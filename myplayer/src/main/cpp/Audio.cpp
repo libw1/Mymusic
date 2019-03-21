@@ -225,3 +225,15 @@ int Audio::getCurrentSampleRateForOpensles(int sample_rate) {
     }
     return rate;
 }
+
+void Audio::pause() {
+    if (pcmPlayerPlay != NULL){
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay,SL_PLAYSTATE_PAUSED);
+    }
+}
+
+void Audio::resume() {
+    if (pcmPlayerPlay != NULL){
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay,SL_PLAYSTATE_PLAYING);
+    }
+}

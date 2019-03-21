@@ -46,3 +46,21 @@ Java_conykais_myplayer_player_Player_n_1start(JNIEnv *env, jobject instance) {
     }
 }
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1pause(JNIEnv *env, jobject instance) {
+
+    if (fFmpeg != NULL){
+        fFmpeg->pause();
+    }
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1resume(JNIEnv *env, jobject instance) {
+    if (fFmpeg != NULL){
+        fFmpeg->resume();
+    }
+
+}

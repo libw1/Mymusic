@@ -137,3 +137,15 @@ FFmpeg::~FFmpeg() {
 
 }
 
+void FFmpeg::pause() {
+    if (audio != NULL){
+        audio->pause();
+    }
+}
+
+void FFmpeg::resume() {
+    if (audio != NULL){
+        audio->resume();
+    }
+}
+
