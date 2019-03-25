@@ -7,5 +7,6 @@
 PlayStatus::PlayStatus() {
 
     exit = false;
+    load = true;
 
 }

@@ -55,7 +55,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void begin(View view) {
 //        player.setSource("http://mpge.5nd.com/2015/2015-11-26/69708/1.mp3");
-        player.setSource("/sdcard/youtube-dl/lovestroy.m4a");
+//        player.setSource("/sdcard/youtube-dl/lovestory.m4a");
+        player.setSource("http://192.168.0.124/htc.mp3");
 //        player.setSource("/sdcard/youtube-dl/Red.m4a");
 //        player.setSource("/sdcard/youtube-dl/you.mp4");
         player.prepare();

@@ -44,7 +44,7 @@ void FFmpeg::decodecFFmpegThread() {
     for (int i = 0; i < formatContext->nb_streams; i++) {
         if (formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
             if (audio == NULL){
-                audio = new Audio(playStatus, formatContext->streams[i]->codecpar->sample_rate);
+                audio = new Audio(playStatus, formatContext->streams[i]->codecpar->sample_rate,callJava);
                 audio->streamIndex = i;
                 audio->codecpar = formatContext->streams[i]->codecpar;
             }

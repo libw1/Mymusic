@@ -8,6 +8,7 @@
 #include "PlayStatus.h"
 #include "Queue.h"
 #include "pthread.h"
+#include "CallJava.h"
 
 extern "C"{
 #include "libavcodec/avcodec.h"
@@ -24,6 +25,7 @@ public:
     AVCodecParameters *codecpar = NULL;
     Queue *queue = NULL;
     PlayStatus *playStatus = NULL;
+    CallJava *callJava = NULL;
 
     pthread_t playThread;
     AVPacket *avPacket = NULL;
@@ -51,7 +53,7 @@ public:
 
 
 public:
-    Audio(PlayStatus *playStatus, int sampleRate);
+    Audio(PlayStatus *playStatus, int sampleRate, CallJava *callJava);
     ~Audio();
 
     void play();

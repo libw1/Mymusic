@@ -10,6 +10,7 @@ class PlayStatus {
 
 public:
     bool exit;
+    bool load;
 
 public:
     PlayStatus();

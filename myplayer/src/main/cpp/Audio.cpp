@@ -4,8 +4,9 @@
 
 #include "Audio.h"
 
-Audio::Audio(PlayStatus *playStatus, int sampleRate) {
+Audio::Audio(PlayStatus *playStatus, int sampleRate, CallJava *callJava) {
 
+    this->callJava = callJava;
     this->playStatus = playStatus;
     this->sample_rate = sampleRate;
     queue = new Queue(playStatus);
@@ -30,6 +31,21 @@ void Audio::play() {
 
 int Audio::resampleAudio() {
     while (playStatus != NULL && !playStatus->exit){
+        if(queue->getQueueSize() == 0)//加载中
+        {
+            if(!playStatus->load)
+            {
+                playStatus->load = true;
+                callJava->onCallLoad(CHILD_THREAD, true);
+            }
+            continue;
+        } else{
+            if(playStatus->load)
+            {
+                playStatus->load = false;
+                callJava->onCallLoad(CHILD_THREAD, false);
+            }
+        }
         avPacket = av_packet_alloc();
         if (queue->getAvPacket(avPacket) != 0){
             av_packet_free(&avPacket);
