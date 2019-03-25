@@ -30,6 +30,7 @@ void Audio::play() {
 }
 
 int Audio::resampleAudio() {
+    data_size = 0;
     while (playStatus != NULL && !playStatus->exit){
         if(queue->getQueueSize() == 0)//加载中
         {
@@ -100,6 +101,20 @@ int Audio::resampleAudio() {
 
             data_size = nb * out_channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
             LOGE("data size is %d", data_size);
+
+            now_time = avFrame->pts * av_q2d(rational);
+            if(now_time < clock)
+            {
+                now_time = clock;
+            }
+            clock = now_time;
+
+            now_time = avFrame->pts * av_q2d(rational);
+            if (now_time < clock){
+                now_time = clock;
+            }
+            clock = now_time;
+
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
@@ -129,6 +144,14 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context)
         int buffersize = audio->resampleAudio();
         if(buffersize > 0)
         {
+            LOGD("pcmBufferCallBack %d",buffersize);
+            audio->clock += buffersize / (double)(audio->sample_rate * 2 * 2);
+            if (audio->clock - audio->last_time > 0.1){
+
+                audio->last_time = audio->clock;
+
+                audio->callJava->onTimeInfo(CHILD_THREAD,audio->clock,audio->duration);
+            }
             (* audio-> pcmBufferQueue)->Enqueue( audio->pcmBufferQueue, (char *) audio-> buffer, buffersize);
         }
     }

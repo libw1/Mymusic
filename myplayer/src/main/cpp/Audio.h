@@ -35,6 +35,12 @@ public:
     int data_size = 0;
     int sample_rate = 0;
 
+    int duration = 0;
+    AVRational rational;
+    double clock;
+    double now_time;
+    double last_time;
+
     // 引擎接口
     SLObjectItf engineObject = NULL;
     SLEngineItf engineEngine = NULL;

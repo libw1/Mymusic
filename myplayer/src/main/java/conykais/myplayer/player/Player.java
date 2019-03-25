@@ -3,9 +3,11 @@ package conykais.myplayer.player;
 import android.text.TextUtils;
 import android.util.Log;
 
+import conykais.myplayer.TimeInfo;
 import conykais.myplayer.listener.OnLoadListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
+import conykais.myplayer.listener.OnTimeInfoListenter;
 
 public class Player {
 
@@ -25,6 +27,8 @@ public class Player {
     private OnPreparedListener preparedListener;
     private OnLoadListener onLoadListener;
     private OnPauseResumeListener pauseResumeListener;
+    private OnTimeInfoListenter timeInfoListenter;
+    private static TimeInfo timeInfo;
 
     public static final String TAG = "lbw";
     
@@ -42,6 +46,10 @@ public class Player {
 
     public void setPauseResumeListener(OnPauseResumeListener pauseResumeListener) {
         this.pauseResumeListener = pauseResumeListener;
+    }
+
+    public void setTimeInfoListenter(OnTimeInfoListenter timeInfoListenter) {
+        this.timeInfoListenter = timeInfoListenter;
     }
 
     public void prepare(){
@@ -95,6 +103,17 @@ public class Player {
     private void callOnLoad(boolean load){
         if (onLoadListener != null){
             onLoadListener.onLoad(load);
+        }
+    }
+
+    public void onTimeInfo(int currentTime, int duration){
+        if (timeInfoListenter != null){
+            if (timeInfo == null){
+                timeInfo = new TimeInfo();
+            }
+            timeInfo.setCurrentTime(currentTime);
+            timeInfo.setDuration(duration);
+            timeInfoListenter.onTimeInfo(timeInfo);
         }
     }
 

@@ -19,6 +19,7 @@ public:
 
     jmethodID jmid_prepare;
     jmethodID jmid_load;
+    jmethodID jmid_onTimeInfo;
 
 public:
     CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *jobj);
@@ -27,6 +28,8 @@ public:
     void onPrepare(int type);
 
     void onCallLoad(int type, bool load);
+
+    void onTimeInfo(int type, int current_time, int duration);
 };
 
 

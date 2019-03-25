@@ -7,19 +7,25 @@ import android.view.View;
 import android.widget.TextView;
 
 import conykais.myplayer.Demo;
+import conykais.myplayer.TimeInfo;
+import conykais.myplayer.TimeUtil;
 import conykais.myplayer.listener.OnLoadListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
+import conykais.myplayer.listener.OnTimeInfoListenter;
 import conykais.myplayer.player.Player;
 
 public class MainActivity extends AppCompatActivity {
 
     private Player player;
+    private TextView timeInfoText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        timeInfoText = findViewById(R.id.time_info);
 
         player = new Player();
         player.setPreparedListener(new OnPreparedListener() {
@@ -51,12 +57,24 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        player.setTimeInfoListenter(new OnTimeInfoListenter() {
+            @Override
+            public void onTimeInfo(final TimeInfo timeInfo) {
+                timeInfoText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        timeInfoText.setText(TimeUtil.secdsToDateFormat(timeInfo.getDuration(),timeInfo.getDuration())
+                                + "/" + TimeUtil.secdsToDateFormat(timeInfo.getCurrentTime(), timeInfo.getDuration()));
+                    }
+                });
+            }
+        });
     }
 
     public void begin(View view) {
 //        player.setSource("http://mpge.5nd.com/2015/2015-11-26/69708/1.mp3");
-//        player.setSource("/sdcard/youtube-dl/lovestory.m4a");
-        player.setSource("http://192.168.0.124/htc.mp3");
+        player.setSource("/sdcard/youtube-dl/lovestory.m4a");
+//        player.setSource("http://192.168.0.124/htc.mp3");
 //        player.setSource("/sdcard/youtube-dl/Red.m4a");
 //        player.setSource("/sdcard/youtube-dl/you.mp4");
         player.prepare();
