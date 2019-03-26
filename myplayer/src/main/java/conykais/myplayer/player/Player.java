@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import conykais.myplayer.TimeInfo;
+import conykais.myplayer.listener.OnCompleteListener;
 import conykais.myplayer.listener.OnErrorListener;
 import conykais.myplayer.listener.OnLoadListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
@@ -30,6 +31,7 @@ public class Player {
     private OnPauseResumeListener pauseResumeListener;
     private OnTimeInfoListenter timeInfoListenter;
     private OnErrorListener errorListener;
+    private OnCompleteListener completeListener;
     private static TimeInfo timeInfo;
 
     public static final String TAG = "lbw";
@@ -56,6 +58,10 @@ public class Player {
 
     public void setErrorListener(OnErrorListener errorListener) {
         this.errorListener = errorListener;
+    }
+
+    public void setCompleteListener(OnCompleteListener completeListener) {
+        this.completeListener = completeListener;
     }
 
     public void prepare(){
@@ -109,10 +115,15 @@ public class Player {
         }).start();
     }
 
+
     public void onCallPrepare(){
         if (preparedListener != null){
             preparedListener.onPrepared();
         }
+    }
+
+    public void seek(int secds){
+        n_seek(secds);
     }
 
     private void callOnLoad(boolean load){
@@ -139,6 +150,13 @@ public class Player {
         }
     }
 
+    public void onComplete(){
+        if (completeListener != null){
+            stop();
+            completeListener.onComplete();
+        }
+    }
+
     public native void n_prepare(String source);
 
     public native void n_start();
@@ -148,4 +166,6 @@ public class Player {
     public native void n_resume();
 
     public native void n_stop();
+
+    public native void n_seek(int secds);
 }

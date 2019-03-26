@@ -10,6 +10,7 @@ FFmpeg::FFmpeg(PlayStatus *playStatus, CallJava *callJava, const char *source) {
     this->url = source;
     exit = false;
     pthread_mutex_init(&init_mutex,NULL);
+    pthread_mutex_init(&seek_mutex,NULL);
 
 
 }
@@ -70,6 +71,7 @@ void FFmpeg::decodecFFmpegThread() {
                 audio->codecpar = formatContext->streams[i]->codecpar;
                 audio->duration = formatContext->duration / AV_TIME_BASE;
                 audio->rational = formatContext->streams[i]->time_base;
+                duration = audio->duration;
             }
         }
     }
@@ -135,14 +137,23 @@ void FFmpeg::start() {
     int count = 0;
 
     while (playStatus != NULL && !playStatus->exit){
+        if (playStatus->seek){
+            continue;
+        }
+        if (audio->queue->getQueueSize() > 40){
+            continue;
+        }
         AVPacket *avPacket = av_packet_alloc();
-        if(av_read_frame(formatContext, avPacket) == 0)
+        pthread_mutex_lock(&seek_mutex);
+        int ret = av_read_frame(formatContext, avPacket);
+        pthread_mutex_unlock(&seek_mutex);
+        if( ret == 0)
         {
             if(avPacket->stream_index == audio->streamIndex)
             {
                 //解码操作
                 count++;
-                LOGE("解码第 %d 帧", count);
+//                LOGE("解码第 %d 帧", count);
 //                av_packet_free(&avPacket);
 //                av_free(avPacket);
                 audio->queue->putAvPacket(avPacket);
@@ -165,6 +176,9 @@ void FFmpeg::start() {
             }
         }
     }
+    if (callJava != NULL){
+        callJava->OnComplete(CHILD_THREAD);
+    }
     exit = true;
     //模拟出队
 //    while (audio->queue->getQueueSize() > 0)
@@ -175,11 +189,12 @@ void FFmpeg::start() {
 //        av_free(packet);
 //        packet = NULL;
 //    }
-    LOGD("解码完成");
+//    LOGD("解码完成");
 }
 
 FFmpeg::~FFmpeg() {
     pthread_mutex_destroy(&init_mutex);
+    pthread_mutex_destroy(&seek_mutex);
 }
 
 void FFmpeg::pause() {
@@ -232,4 +247,24 @@ void FFmpeg::release() {
     }
     pthread_mutex_unlock(&init_mutex);
 
+}
+
+void FFmpeg::seek(int64_t secds) {
+
+    if (duration <= 0){
+        return;
+    }
+    if (secds > 0 && secds <= duration){
+        if (audio != NULL){
+            audio->playStatus->seek = true;
+            audio->queue->clearAvpacket();
+            audio->clock = 0;
+            audio->last_time = 0;
+            pthread_mutex_lock(&seek_mutex);
+            int64_t rel = secds * AV_TIME_BASE;
+            avformat_seek_file(formatContext,-1,INT64_MIN,rel,INT64_MAX,0);
+            pthread_mutex_unlock(&seek_mutex);
+            audio->playStatus->seek = false;
+        }
+    }
 }

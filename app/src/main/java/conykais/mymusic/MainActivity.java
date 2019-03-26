@@ -9,6 +9,7 @@ import android.widget.TextView;
 import conykais.myplayer.Demo;
 import conykais.myplayer.TimeInfo;
 import conykais.myplayer.TimeUtil;
+import conykais.myplayer.listener.OnCompleteListener;
 import conykais.myplayer.listener.OnErrorListener;
 import conykais.myplayer.listener.OnLoadListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
@@ -20,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Player player;
     private TextView timeInfoText;
+    private int time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         player.setTimeInfoListenter(new OnTimeInfoListenter() {
             @Override
             public void onTimeInfo(final TimeInfo timeInfo) {
+                time = timeInfo.getCurrentTime();
                 timeInfoText.post(new Runnable() {
                     @Override
                     public void run() {
@@ -75,6 +78,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onError(int code, String msg) {
                 Log.d("lbw", "onError: code = " + code + " msg = " + msg);
+            }
+        });
+
+        player.setCompleteListener(new OnCompleteListener() {
+            @Override
+            public void onComplete() {
+                Log.d("lbw", "播放完成!");
             }
         });
     }
@@ -99,5 +109,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void stop(View view) {
         player.stop();
+    }
+
+    public void seek(View view) {
+        player.seek(time + 10);
     }
 }
