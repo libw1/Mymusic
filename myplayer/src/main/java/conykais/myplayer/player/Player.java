@@ -94,6 +94,15 @@ public class Player {
         }
     }
 
+    public void stop() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                n_stop();
+            }
+        }).start();
+    }
+
     public void onCallPrepare(){
         if (preparedListener != null){
             preparedListener.onPrepared();
@@ -124,4 +133,6 @@ public class Player {
     public native void n_pause();
 
     public native void n_resume();
+
+    public native void n_stop();
 }

@@ -67,3 +67,7 @@ void CallJava::onTimeInfo(int type, int current_time, int duration) {
         env->CallVoidMethod(jobj,jmid_onTimeInfo,current_time, duration);
     }
 }
+
+CallJava::~CallJava() {
+
+}

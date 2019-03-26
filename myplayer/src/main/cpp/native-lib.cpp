@@ -64,3 +64,24 @@ Java_conykais_myplayer_player_Player_n_1resume(JNIEnv *env, jobject instance) {
     }
 
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1stop(JNIEnv *env, jobject instance) {
+
+    if (fFmpeg != NULL){
+        fFmpeg->release();
+        delete (fFmpeg);
+        fFmpeg = NULL;
+        if (callJava != NULL){
+            delete (callJava);
+            callJava = NULL;
+        }
+
+        if (playStatus != NULL){
+            delete(playStatus);
+            playStatus = NULL;
+        }
+    }
+
+}

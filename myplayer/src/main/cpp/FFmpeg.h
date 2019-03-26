@@ -9,9 +9,11 @@
 #include "pthread.h"
 #include "Audio.h"
 #include "PlayStatus.h"
+#include "pthread.h"
 
 extern "C"{
 #include <libavformat/avformat.h>
+#include <libavutil/time.h>
 };
 
 class FFmpeg {
@@ -23,7 +25,8 @@ public:
     AVFormatContext *formatContext = NULL;
     Audio *audio = NULL;
     PlayStatus *playStatus = NULL;
-
+    pthread_mutex_t init_mutex;
+    bool exit = false;
 
 
 public:
@@ -35,6 +38,7 @@ public:
     void start();
     void pause();
     void resume();
+    void release();
 };
 
 

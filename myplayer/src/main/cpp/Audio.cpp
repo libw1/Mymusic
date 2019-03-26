@@ -100,7 +100,7 @@ int Audio::resampleAudio() {
             int out_channels = av_get_channel_layout_nb_channels(AV_CH_LAYOUT_STEREO);
 
             data_size = nb * out_channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
-            LOGE("data size is %d", data_size);
+//            LOGE("data size is %d", data_size);
 
             now_time = avFrame->pts * av_q2d(rational);
             if(now_time < clock)
@@ -144,7 +144,7 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context)
         int buffersize = audio->resampleAudio();
         if(buffersize > 0)
         {
-            LOGD("pcmBufferCallBack %d",buffersize);
+//            LOGD("pcmBufferCallBack %d",buffersize);
             audio->clock += buffersize / (double)(audio->sample_rate * 2 * 2);
             if (audio->clock - audio->last_time > 0.1){
 
@@ -274,5 +274,51 @@ void Audio::pause() {
 void Audio::resume() {
     if (pcmPlayerPlay != NULL){
         (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay,SL_PLAYSTATE_PLAYING);
+    }
+}
+
+void Audio::stop() {
+    if (pcmPlayerPlay != NULL){
+        (*pcmPlayerPlay)->SetPlayState(pcmPlayerPlay,SL_PLAYSTATE_STOPPED);
+    }
+
+}
+
+void Audio::release() {
+    stop();
+    if (queue != NULL){
+        delete(queue);
+        queue = NULL;
+    }
+    if (pcmPlayerObject != NULL){
+        (*pcmPlayerObject)->Destroy(pcmPlayerObject);
+        pcmPlayerObject = NULL;
+        pcmPlayerPlay = NULL;
+        pcmBufferQueue = NULL;
+    }
+    if (outputMixObject != NULL){
+        (*outputMixObject)->Destroy(outputMixObject);
+        outputMixObject = NULL;
+        outputMixEnvironmentalReverb = NULL;
+    }
+    if (engineObject != NULL){
+        (*engineObject)->Destroy(engineObject);
+        engineObject = NULL;
+        engineEngine = NULL;
+    }
+    if (buffer != NULL){
+        free(buffer);
+        buffer = NULL;
+    }
+    if (codecContext != NULL){
+        avcodec_close(codecContext);
+        avcodec_free_context(&codecContext);
+        codecContext = NULL;
+    }
+    if (callJava != NULL){
+        callJava = NULL;
+    }
+    if (playStatus != NULL){
+        playStatus = NULL;
     }
 }
