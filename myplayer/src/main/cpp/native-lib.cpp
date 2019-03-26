@@ -8,7 +8,7 @@ CallJava *callJava = NULL;
 FFmpeg *fFmpeg = NULL;
 PlayStatus *playStatus = NULL;
 pthread_t thread_start;
-
+bool nexit = true;
 
 extern "C" JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM *vm, void *res){
@@ -76,6 +76,12 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_conykais_myplayer_player_Player_n_1stop(JNIEnv *env, jobject instance) {
 
+    if (!nexit){
+        return;
+    }
+    jclass jcz = env->GetObjectClass(instance);
+    jmethodID jmid_next = env->GetMethodID(jcz,"onCallNext","()V");
+    nexit = false;
     if (fFmpeg != NULL){
         fFmpeg->release();
         delete (fFmpeg);
@@ -90,8 +96,12 @@ Java_conykais_myplayer_player_Player_n_1stop(JNIEnv *env, jobject instance) {
             playStatus = NULL;
         }
     }
+    nexit = true;
+    env->CallVoidMethod(instance,jmid_next);
 
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT void JNICALL
 Java_conykais_myplayer_player_Player_n_1seek(JNIEnv *env, jobject instance, jint secds) {
 

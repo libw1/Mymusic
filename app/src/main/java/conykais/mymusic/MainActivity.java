@@ -114,4 +114,8 @@ public class MainActivity extends AppCompatActivity {
     public void seek(View view) {
         player.seek(time + 10);
     }
+
+    public void next(View view) {
+        player.playNext("/sdcard/youtube-dl/Red.m4a");
+    }
 }

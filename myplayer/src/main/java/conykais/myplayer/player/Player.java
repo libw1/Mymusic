@@ -33,6 +33,7 @@ public class Player {
     private OnErrorListener errorListener;
     private OnCompleteListener completeListener;
     private static TimeInfo timeInfo;
+    private static boolean playNext = false;
 
     public static final String TAG = "lbw";
     
@@ -115,6 +116,15 @@ public class Player {
         }).start();
     }
 
+    public void seek(int secds){
+        n_seek(secds);
+    }
+
+    public void playNext(String url){
+        source = url;
+        playNext = true;
+        stop();
+    }
 
     public void onCallPrepare(){
         if (preparedListener != null){
@@ -122,9 +132,6 @@ public class Player {
         }
     }
 
-    public void seek(int secds){
-        n_seek(secds);
-    }
 
     private void callOnLoad(boolean load){
         if (onLoadListener != null){
@@ -154,6 +161,13 @@ public class Player {
         if (completeListener != null){
             stop();
             completeListener.onComplete();
+        }
+    }
+
+    public void onCallNext(){
+        if (playNext){
+            playNext = false;
+            prepare();
         }
     }
 
