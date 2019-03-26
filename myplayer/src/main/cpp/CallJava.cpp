@@ -19,6 +19,7 @@ CallJava::CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *job) {
     this->jmid_prepare = jnienv->GetMethodID(jcl,"onCallPrepare","()V");
     this->jmid_load = jnienv->GetMethodID(jcl, "callOnLoad", "(Z)V");
     this->jmid_onTimeInfo = jnienv->GetMethodID(jcl,"onTimeInfo","(II)V");
+    this->jmid_onError = jnienv->GetMethodID(jcl,"onError","(ILjava/lang/String;)V");
 }
 
 void CallJava::onPrepare(int type) {
@@ -33,6 +34,7 @@ void CallJava::onPrepare(int type) {
             return;
         }
         env->CallVoidMethod(jobj,jmid_prepare);
+        javaVM->DetachCurrentThread();
     }
 
 }
@@ -49,6 +51,7 @@ void CallJava::onCallLoad(int type, bool load) {
             return;
         }
         env->CallVoidMethod(jobj,jmid_load,load);
+        javaVM->DetachCurrentThread();
     }
 
 }
@@ -65,9 +68,29 @@ void CallJava::onTimeInfo(int type, int current_time, int duration) {
             return;
         }
         env->CallVoidMethod(jobj,jmid_onTimeInfo,current_time, duration);
+        javaVM->DetachCurrentThread();
     }
 }
 
 CallJava::~CallJava() {
 
+}
+
+void CallJava::OnError(int type, int code, char *msg) {
+    if (type == MAIN_THREAD)
+    {
+        jstring jmsg = jniEnv->NewStringUTF(msg);
+        jniEnv->CallVoidMethod(jobj,jmid_onError,code, jmsg);
+        jniEnv->DeleteLocalRef(jmsg);
+    } else if (type == CHILD_THREAD){
+        JNIEnv *env;
+        if (javaVM->AttachCurrentThread(&env,0) != JNI_OK){
+            LOGE("get child thread jnienv wrong");
+            return;
+        }
+        jstring jmsg = env->NewStringUTF(msg);
+        env->CallVoidMethod(jobj,jmid_onError,code, jmsg);
+        env->DeleteLocalRef(jmsg);
+        javaVM->DetachCurrentThread();
+    }
 }

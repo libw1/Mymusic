@@ -36,6 +36,7 @@ void FFmpeg::decodecFFmpegThread() {
 
     if (avformat_open_input(&formatContext,url,NULL,NULL) != 0){
         LOGE("can not open url");
+        callJava->OnError(CHILD_THREAD, 1001, "can not open url");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -43,6 +44,7 @@ void FFmpeg::decodecFFmpegThread() {
 
     if (avformat_find_stream_info(formatContext,0) < 0){
         LOGE("can not find stream from %s",url);
+        callJava->OnError(CHILD_THREAD,1002,"can not find stream from url");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -63,6 +65,7 @@ void FFmpeg::decodecFFmpegThread() {
     AVCodec *codec = avcodec_find_decoder(audio->codecpar->codec_id);
     if (!codec){
         LOGE("can not find codecer");
+        callJava->OnError(CHILD_THREAD,1003,"can not find codecer");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -72,6 +75,7 @@ void FFmpeg::decodecFFmpegThread() {
 
     if (!audio->codecContext){
         LOGE("can not find codecCtx");
+        callJava->OnError(CHILD_THREAD,1004,"can not find codecCtx");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -80,6 +84,7 @@ void FFmpeg::decodecFFmpegThread() {
     if (avcodec_parameters_to_context(audio->codecContext,audio->codecpar) < 0){
 
         LOGE("can not fill decodecctx");
+        callJava->OnError(CHILD_THREAD,1005,"can not fill decodecctx");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;
@@ -87,6 +92,7 @@ void FFmpeg::decodecFFmpegThread() {
 
     if (avcodec_open2(audio->codecContext,codec,0) != 0){
         LOGD("can not open audio streams");
+        callJava->OnError(CHILD_THREAD,1006,"can not open audio streams");
         exit = true;
         pthread_mutex_unlock(&init_mutex);
         return;

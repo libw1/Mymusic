@@ -9,6 +9,7 @@ import android.widget.TextView;
 import conykais.myplayer.Demo;
 import conykais.myplayer.TimeInfo;
 import conykais.myplayer.TimeUtil;
+import conykais.myplayer.listener.OnErrorListener;
 import conykais.myplayer.listener.OnLoadListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
@@ -67,6 +68,13 @@ public class MainActivity extends AppCompatActivity {
                                 + "/" + TimeUtil.secdsToDateFormat(timeInfo.getCurrentTime(), timeInfo.getDuration()));
                     }
                 });
+            }
+        });
+
+        player.setErrorListener(new OnErrorListener() {
+            @Override
+            public void onError(int code, String msg) {
+                Log.d("lbw", "onError: code = " + code + " msg = " + msg);
             }
         });
     }
