@@ -28,11 +28,23 @@ void FFmpeg::prepare() {
 
 }
 
+int avformat_callback(void * ctx){
+
+    FFmpeg *fFmpeg = (FFmpeg *)(ctx);
+    if (fFmpeg->playStatus->exit){
+        return AVERROR_EOF;
+    }
+    return 0;
+}
+
 void FFmpeg::decodecFFmpegThread() {
     pthread_mutex_lock(&init_mutex);
     av_register_all();
     avformat_network_init();
     formatContext = avformat_alloc_context();
+
+    formatContext->interrupt_callback.callback = avformat_callback;
+    formatContext->interrupt_callback.opaque = this;
 
     if (avformat_open_input(&formatContext,url,NULL,NULL) != 0){
         LOGE("can not open url");
