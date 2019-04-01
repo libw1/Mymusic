@@ -128,3 +128,13 @@ Java_conykais_myplayer_player_Player_n_1duration(JNIEnv *env, jobject instance) 
     }
 
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1set_1mute(JNIEnv *env, jobject instance, jint mute) {
+
+    if (fFmpeg != NULL){
+        fFmpeg->setMute(mute);
+    }
+
+}

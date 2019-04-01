@@ -8,6 +8,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import conykais.myplayer.Demo;
+import conykais.myplayer.MuteEnum;
 import conykais.myplayer.TimeInfo;
 import conykais.myplayer.TimeUtil;
 import conykais.myplayer.listener.OnCompleteListener;
@@ -172,5 +173,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void next(View view) {
         player.playNext("/sdcard/youtube-dl/Red.m4a");
+    }
+
+    public void right(View view) {
+        player.setMute(MuteEnum.MUTE_RIGHT);
+    }
+
+    public void left(View view) {
+        player.setMute(MuteEnum.MUTE_LEFT);
+    }
+
+    public void center(View view) {
+        player.setMute(MuteEnum.MUTE_CENTER);
     }
 }

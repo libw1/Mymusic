@@ -3,6 +3,7 @@ package conykais.myplayer.player;
 import android.text.TextUtils;
 import android.util.Log;
 
+import conykais.myplayer.MuteEnum;
 import conykais.myplayer.TimeInfo;
 import conykais.myplayer.listener.OnCompleteListener;
 import conykais.myplayer.listener.OnErrorListener;
@@ -36,6 +37,7 @@ public class Player {
     private static boolean playNext = false;
     private static int currentVolume = 100;
     private static int duration = -1;
+    private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
 
     public static final String TAG = "lbw";
     
@@ -147,6 +149,11 @@ public class Player {
         return duration;
     }
 
+    public void setMute(MuteEnum mute){
+        muteEnum = mute;
+        n_set_mute(mute.getValue());
+    }
+
     @SuppressWarnings("unused")
     public void onCallPrepare(){
         if (preparedListener != null){
@@ -213,4 +220,6 @@ public class Player {
     public native void n_set_volume(int volume);
 
     public native int n_duration();
+
+    public native void n_set_mute(int mute);
 }

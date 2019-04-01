@@ -274,3 +274,10 @@ void FFmpeg::setVolume(int volume) {
         audio->setVolume(volume);
     }
 }
+
+void FFmpeg::setMute(int mute) {
+
+    if (audio != NULL){
+        audio->setMute(mute);
+    }
+}
