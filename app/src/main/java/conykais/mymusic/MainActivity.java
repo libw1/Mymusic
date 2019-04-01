@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import conykais.myplayer.Demo;
@@ -22,6 +23,11 @@ public class MainActivity extends AppCompatActivity {
     private Player player;
     private TextView timeInfoText;
     private int time;
+    private TextView voiceText;
+    private SeekBar playSeekBar;
+    private SeekBar voiceSeekbar;
+    private boolean isSeekBar;
+    private int position = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +35,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         timeInfoText = findViewById(R.id.time_info);
+        voiceText = findViewById(R.id.voice_info);
+        playSeekBar = findViewById(R.id.play_seek_bar);
+        voiceSeekbar = findViewById(R.id.voice_seek_bar);
 
         player = new Player();
+        voiceText.setText("音量：" + player.getCurrentVolume() + "%");
+        voiceSeekbar.setProgress(player.getCurrentVolume());
+
+
         player.setPreparedListener(new OnPreparedListener() {
             @Override
             public void onPrepared() {
@@ -67,8 +80,11 @@ public class MainActivity extends AppCompatActivity {
                 timeInfoText.post(new Runnable() {
                     @Override
                     public void run() {
-                        timeInfoText.setText(TimeUtil.secdsToDateFormat(timeInfo.getDuration(),timeInfo.getDuration())
-                                + "/" + TimeUtil.secdsToDateFormat(timeInfo.getCurrentTime(), timeInfo.getDuration()));
+                        if (!isSeekBar) {
+                            timeInfoText.setText(TimeUtil.secdsToDateFormat(timeInfo.getDuration(), timeInfo.getDuration())
+                                    + "/" + TimeUtil.secdsToDateFormat(timeInfo.getCurrentTime(), timeInfo.getDuration()));
+                            playSeekBar.setProgress(timeInfo.getCurrentTime() * 100 / timeInfo.getDuration());
+                        }
                     }
                 });
             }
@@ -87,11 +103,54 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("lbw", "播放完成!");
             }
         });
+
+        voiceSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                player.setVolume(progress);
+                voiceText.setText("音量：" + player.getCurrentVolume() + "%");
+                Log.d("lbw", "progress is " + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        playSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (player.getDuration() > 0 && isSeekBar){
+                    position = progress * player.getDuration() / 100;
+                    timeInfoText.setText(TimeUtil.secdsToDateFormat(player.getDuration(), player.getDuration())
+                            + "/" + TimeUtil.secdsToDateFormat(progress * player.getDuration() / 100 , player.getDuration()));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                isSeekBar = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                player.seek(position);
+                isSeekBar = false;
+            }
+        });
+
     }
 
     public void begin(View view) {
 //        player.setSource("http://mpge.5nd.com/2015/2015-11-26/69708/1.mp3");
         player.setSource("/sdcard/youtube-dl/lovestory.m4a");
+//        player.setSource("/sdcard/youtube-dl/22.m4a");
 //        player.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
 //        player.setSource("http://192.168.0.124/htc.mp3");
 //        player.setSource("/sdcard/youtube-dl/Red.m4a");
@@ -109,10 +168,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void stop(View view) {
         player.stop();
-    }
-
-    public void seek(View view) {
-        player.seek(time + 10);
     }
 
     public void next(View view) {

@@ -268,3 +268,9 @@ void FFmpeg::seek(int64_t secds) {
         }
     }
 }
+
+void FFmpeg::setVolume(int volume) {
+    if (audio != NULL){
+        audio->setVolume(volume);
+    }
+}

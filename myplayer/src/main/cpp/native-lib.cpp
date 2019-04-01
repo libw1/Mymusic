@@ -109,3 +109,22 @@ Java_conykais_myplayer_player_Player_n_1seek(JNIEnv *env, jobject instance, jint
         fFmpeg->seek(secds);
     }
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1set_1volume(JNIEnv *env, jobject instance, jint volume) {
+
+    if (fFmpeg != NULL){
+        fFmpeg->setVolume(volume);
+    }
+
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_conykais_myplayer_player_Player_n_1duration(JNIEnv *env, jobject instance) {
+
+    if (fFmpeg != NULL){
+        return fFmpeg->duration;
+    }
+
+}

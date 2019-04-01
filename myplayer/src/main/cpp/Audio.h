@@ -40,6 +40,7 @@ public:
     double clock;
     double now_time;
     double last_time;
+    int volumePercent = 100;
 
     // 引擎接口
     SLObjectItf engineObject = NULL;
@@ -53,6 +54,7 @@ public:
     //pcm
     SLObjectItf pcmPlayerObject = NULL;
     SLPlayItf pcmPlayerPlay = NULL;
+    SLVolumeItf pcmVolumePlay = NULL;
 
     //缓冲器队列接口
     SLAndroidSimpleBufferQueueItf pcmBufferQueue = NULL;
@@ -75,6 +77,8 @@ public:
     void stop();
 
     void release();
+
+    void setVolume(int volume);
 };
 
 

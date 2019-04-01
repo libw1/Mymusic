@@ -34,6 +34,8 @@ public class Player {
     private OnCompleteListener completeListener;
     private static TimeInfo timeInfo;
     private static boolean playNext = false;
+    private static int currentVolume = 100;
+    private static int duration = -1;
 
     public static final String TAG = "lbw";
     
@@ -108,6 +110,7 @@ public class Player {
     }
 
     public void stop() {
+        duration = -1;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -126,6 +129,25 @@ public class Player {
         stop();
     }
 
+    public void setVolume(int volume){
+        if (volume >= 0 && volume <= 100){
+            currentVolume = volume;
+            n_set_volume(volume);
+        }
+    }
+
+    public int getCurrentVolume(){
+        return currentVolume;
+    }
+
+    public int getDuration(){
+        if (duration < 0){
+            duration = n_duration();
+        }
+        return duration;
+    }
+
+    @SuppressWarnings("unused")
     public void onCallPrepare(){
         if (preparedListener != null){
             preparedListener.onPrepared();
@@ -133,12 +155,14 @@ public class Player {
     }
 
 
+    @SuppressWarnings("unused")
     private void callOnLoad(boolean load){
         if (onLoadListener != null){
             onLoadListener.onLoad(load);
         }
     }
 
+    @SuppressWarnings("unused")
     public void onTimeInfo(int currentTime, int duration){
         if (timeInfoListenter != null){
             if (timeInfo == null){
@@ -150,6 +174,7 @@ public class Player {
         }
     }
 
+    @SuppressWarnings("unused")
     public void onError(int code , String msg){
         if (errorListener != null){
             stop();
@@ -157,6 +182,7 @@ public class Player {
         }
     }
 
+    @SuppressWarnings("unused")
     public void onComplete(){
         if (completeListener != null){
             stop();
@@ -164,6 +190,7 @@ public class Player {
         }
     }
 
+    @SuppressWarnings("unused")
     public void onCallNext(){
         if (playNext){
             playNext = false;
@@ -182,4 +209,8 @@ public class Player {
     public native void n_stop();
 
     public native void n_seek(int secds);
+
+    public native void n_set_volume(int volume);
+
+    public native int n_duration();
 }
