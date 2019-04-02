@@ -154,12 +154,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void begin(View view) {
 //        player.setSource("http://mpge.5nd.com/2015/2015-11-26/69708/1.mp3");
-        player.setSource("/sdcard/youtube-dl/lovestory.m4a");
+//        player.setSource("/sdcard/youtube-dl/lovestory.m4a");
 //        player.setSource("/sdcard/youtube-dl/22.m4a");
 //        player.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
 //        player.setSource("http://192.168.0.124/htc.mp3");
 //        player.setSource("/sdcard/youtube-dl/Red.m4a");
-//        player.setSource("/sdcard/youtube-dl/you.mp4");
+        player.setSource("/sdcard/youtube-dl/you.mp4");
         player.prepare();
     }
 
@@ -176,7 +176,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void next(View view) {
-        player.playNext("/sdcard/youtube-dl/Red.m4a");
+//        player.playNext("/sdcard/youtube-dl/Red.m4a");
+//        player.playNext("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
+        player.playNext("http://ngcdn004.cnr.cn/live/dszs/index12.m3u8");
     }
 
     public void right(View view) {
