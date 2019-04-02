@@ -138,3 +138,22 @@ Java_conykais_myplayer_player_Player_n_1set_1mute(JNIEnv *env, jobject instance,
     }
 
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1set_1speed(JNIEnv *env, jobject instance, jfloat speed) {
+
+    if (fFmpeg != NULL){
+        fFmpeg->setSpeed(speed);
+    }
+
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1set_1pitch(JNIEnv *env, jobject instance, jfloat pitch) {
+    if (fFmpeg != NULL){
+        fFmpeg->setPitch(pitch);
+    }
+
+}

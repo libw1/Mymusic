@@ -11,6 +11,13 @@ Audio::Audio(PlayStatus *playStatus, int sampleRate, CallJava *callJava) {
     this->sample_rate = sampleRate;
     queue = new Queue(playStatus);
     buffer = (uint8_t *) av_malloc(sampleRate * 2 * 2);
+
+    sampleBuffer = (SAMPLETYPE *)(malloc(sampleRate * 2 * 2));
+    soundTouch = new SoundTouch();
+    soundTouch->setSampleRate(sampleRate);
+    soundTouch->setChannels(2);
+    soundTouch->setPitch(pitch);
+    soundTouch->setTempo(speed);
 }
 
 Audio::~Audio() {
@@ -29,7 +36,7 @@ void Audio::play() {
 
 }
 
-int Audio::resampleAudio() {
+int Audio::resampleAudio(void **pcmbuf) {
     data_size = 0;
     while (playStatus != NULL && !playStatus->exit){
         if(queue->getQueueSize() == 0)//加载中
@@ -90,7 +97,7 @@ int Audio::resampleAudio() {
                 continue;
             }
 
-            int nb = swr_convert(
+            nb = swr_convert(
                     swrContext
                     , &buffer
                     , avFrame->nb_samples
@@ -101,7 +108,6 @@ int Audio::resampleAudio() {
 
             data_size = nb * out_channels * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
 //            LOGE("data size is %d", data_size);
-
             now_time = avFrame->pts * av_q2d(rational);
             if(now_time < clock)
             {
@@ -114,7 +120,7 @@ int Audio::resampleAudio() {
                 now_time = clock;
             }
             clock = now_time;
-
+            *pcmbuf = buffer;
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;
@@ -136,12 +142,82 @@ int Audio::resampleAudio() {
     return data_size;
 }
 
+int Audio::getSoundTouchData() {
+//    while(playstatus != NULL && !playstatus->exit)
+//    {
+//        out_buffer = NULL;
+//        if(finished)
+//        {
+//            finished = false;
+//            data_size = resampleAudio(reinterpret_cast<void **>(&out_buffer));
+//            if(data_size > 0)
+//            {
+//                for(int i = 0; i < data_size / 2 + 1; i++)
+//                {
+//                    sampleBuffer[i] = (out_buffer[i * 2] | ((out_buffer[i * 2 + 1]) << 8));
+//                }
+//                soundTouch->putSamples(sampleBuffer, nb);
+//                num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
+//            } else{
+//                soundTouch->flush();
+//            }
+//        }
+//        if(num == 0)
+//        {
+//            finished = true;
+//            continue;
+//        } else{
+//            if(out_buffer == NULL)
+//            {
+//                num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
+//                if(num == 0)
+//                {
+//                    finished = true;
+//                    continue;
+//                }
+//            }
+//            return num;
+//        }
+//    }
+//    return 0;
+    while (playStatus != NULL && !playStatus->exit){
+        out_buffer = NULL;
+        if (finished){
+            finished = false;
+            data_size = resampleAudio(reinterpret_cast<void **>(&out_buffer));
+            if (data_size > 0){
+                for (int i = 0; i < data_size / 2 + 1; i++) {
+                    sampleBuffer[i] = (out_buffer[i * 2] | ((out_buffer[i * 2 + 1]) << 8));
+                }
+                soundTouch->putSamples(sampleBuffer,nb);
+                num = soundTouch->receiveSamples(sampleBuffer,data_size / 4);
+            } else{
+                soundTouch->flush();
+            }
+        }
+        if (num == 0){
+            finished = true;
+            continue;
+        } else{
+            if (out_buffer == NULL){
+                num = soundTouch->receiveSamples(sampleBuffer,data_size / 4);
+            }
+            if (num == 0){
+                finished = true;
+                continue;
+            }
+            return num;
+        }
+    }
+    return 0;
+}
+
 void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context)
 {
     Audio *audio = (Audio *) context;
     if(audio != NULL)
     {
-        int buffersize = audio->resampleAudio();
+        int buffersize = audio->getSoundTouchData();
         if(buffersize > 0)
         {
 //            LOGD("pcmBufferCallBack %d",buffersize);
@@ -152,7 +228,7 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context)
 
                 audio->callJava->onTimeInfo(CHILD_THREAD,audio->clock,audio->duration);
             }
-            (* audio-> pcmBufferQueue)->Enqueue( audio->pcmBufferQueue, (char *) audio-> buffer, buffersize);
+            (* audio-> pcmBufferQueue)->Enqueue( audio->pcmBufferQueue, (char *) audio-> sampleBuffer, buffersize * 2 *2);
         }
     }
 }
@@ -212,6 +288,7 @@ void Audio::initOpenSLES() {
     (*pcmPlayerObject)->GetInterface(pcmPlayerObject, SL_IID_BUFFERQUEUE, &pcmBufferQueue);
 
     setVolume(volumePercent);
+    setMute(mute);
 
     //缓冲接口回调
     (*pcmBufferQueue)->RegisterCallback(pcmBufferQueue, pcmBufferCallBack, this);
@@ -387,3 +464,17 @@ void Audio::setMute(int mu) {
         }
     }
 }
+
+void Audio::setSpeed(float speed) {
+    if (soundTouch != NULL){
+        soundTouch->setTempo(speed);
+    }
+}
+
+void Audio::setPitch(float pitch) {
+
+    if (soundTouch != NULL){
+        soundTouch->setPitch(pitch);
+    }
+}
+

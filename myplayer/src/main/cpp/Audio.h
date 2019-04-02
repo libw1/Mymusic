@@ -9,6 +9,9 @@
 #include "Queue.h"
 #include "pthread.h"
 #include "CallJava.h"
+#include "SoundTouch.h"
+
+using namespace soundtouch;
 
 extern "C"{
 #include "libavcodec/avcodec.h"
@@ -42,6 +45,8 @@ public:
     double last_time;
     int volumePercent = 100;
     int mute = 2;
+    float speed = 1.0f;
+    float pitch = 1.0f;
 
     // 引擎接口
     SLObjectItf engineObject = NULL;
@@ -61,13 +66,20 @@ public:
     //缓冲器队列接口
     SLAndroidSimpleBufferQueueItf pcmBufferQueue = NULL;
 
+    //Sound Touch
+    SoundTouch *soundTouch = NULL;
+    SAMPLETYPE *sampleBuffer = NULL;
+    bool finished = true;
+    uint8_t *out_buffer = NULL;
+    int nb = 0;
+    int num = 0;
 
 public:
     Audio(PlayStatus *playStatus, int sampleRate, CallJava *callJava);
     ~Audio();
 
     void play();
-    int resampleAudio();
+    int resampleAudio(void **pcmbuf);
 
     void initOpenSLES();
     int getCurrentSampleRateForOpensles(int sample_rate);
@@ -83,6 +95,12 @@ public:
     void setVolume(int volume);
 
     void setMute(int mute);
+
+    int getSoundTouchData();
+
+    void setSpeed(float speed);
+
+    void setPitch(float pitch);
 };
 
 

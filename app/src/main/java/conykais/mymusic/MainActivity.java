@@ -41,9 +41,13 @@ public class MainActivity extends AppCompatActivity {
         voiceSeekbar = findViewById(R.id.voice_seek_bar);
 
         player = new Player();
+        player.setVolume(50);
+        player.setMute(MuteEnum.MUTE_RIGHT);
         voiceText.setText("音量：" + player.getCurrentVolume() + "%");
         voiceSeekbar.setProgress(player.getCurrentVolume());
 
+        player.setSpeed(1.5f);
+        player.setPitch(1.5f);
 
         player.setPreparedListener(new OnPreparedListener() {
             @Override
@@ -185,5 +189,25 @@ public class MainActivity extends AppCompatActivity {
 
     public void center(View view) {
         player.setMute(MuteEnum.MUTE_CENTER);
+    }
+
+    public void speed(View view) {
+        player.setSpeed(1.5f);
+        player.setPitch(1.0f);
+    }
+
+    public void pitch(View view) {
+        player.setSpeed(1.0f);
+        player.setPitch(1.5f);
+    }
+
+    public void changeall(View view) {
+        player.setSpeed(1.5f);
+        player.setPitch(1.5f);
+    }
+
+    public void normal(View view) {
+        player.setSpeed(1.0f);
+        player.setPitch(1.0f);
     }
 }

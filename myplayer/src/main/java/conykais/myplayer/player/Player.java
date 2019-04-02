@@ -38,6 +38,8 @@ public class Player {
     private static int currentVolume = 100;
     private static int duration = -1;
     private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
+    private static float speed = 1.0f;
+    private static float pitch = 1.0f;
 
     public static final String TAG = "lbw";
     
@@ -92,6 +94,10 @@ public class Player {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                setVolume(currentVolume);
+                setMute(muteEnum);
+                setSpeed(speed);
+                setPitch(pitch);
                 n_start();
             }
         }).start();
@@ -152,6 +158,16 @@ public class Player {
     public void setMute(MuteEnum mute){
         muteEnum = mute;
         n_set_mute(mute.getValue());
+    }
+
+    public void setSpeed(float sp){
+        speed = sp;
+        n_set_speed(speed);
+    }
+
+    public void setPitch(float pit){
+        pitch = pit;
+        n_set_pitch(pit);
     }
 
     @SuppressWarnings("unused")
@@ -222,4 +238,8 @@ public class Player {
     public native int n_duration();
 
     public native void n_set_mute(int mute);
+
+    public native void n_set_speed(float speed);
+
+    public native void n_set_pitch(float pitch);
 }

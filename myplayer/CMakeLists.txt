@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 include_directories(src/main/cpp/include)
+include_directories(src/main/cpp/soundtouch/include)
 
 add_library( # Sets the name of the library.
              native-lib
@@ -14,7 +15,24 @@ add_library( # Sets the name of the library.
               src/main/cpp/FFmpeg.cpp
               src/main/cpp/Audio.cpp
               src/main/cpp/PlayStatus.cpp
-              src/main/cpp/Queue.cpp)
+              src/main/cpp/Queue.cpp
+              #sound touch
+              src/main/cpp/soundtouch/SoundTouch/AAFilter.cpp
+              src/main/cpp/soundtouch/SoundTouch/BPMDetect.cpp
+              src/main/cpp/soundtouch/SoundTouch/cpu_detect_x86.cpp
+              src/main/cpp/soundtouch/SoundTouch/FIFOSampleBuffer.cpp
+              src/main/cpp/soundtouch/SoundTouch/FIRFilter.cpp
+              src/main/cpp/soundtouch/SoundTouch/InterpolateCubic.cpp
+              src/main/cpp/soundtouch/SoundTouch/InterpolateLinear.cpp
+              src/main/cpp/soundtouch/SoundTouch/InterpolateShannon.cpp
+              src/main/cpp/soundtouch/SoundTouch/mmx_optimized.cpp
+              src/main/cpp/soundtouch/SoundTouch/PeakFinder.cpp
+              src/main/cpp/soundtouch/SoundTouch/RateTransposer.cpp
+              src/main/cpp/soundtouch/SoundTouch/SoundTouch.cpp
+              src/main/cpp/soundtouch/SoundTouch/sse_optimized.cpp
+              src/main/cpp/soundtouch/SoundTouch/TDStretch.cpp
+
+              )
 
 add_library( avcodec-57 SHARED IMPORTED)
 set_target_properties( avcodec-57
