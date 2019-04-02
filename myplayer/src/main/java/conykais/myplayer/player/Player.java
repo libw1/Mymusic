@@ -8,6 +8,7 @@ import conykais.myplayer.TimeInfo;
 import conykais.myplayer.listener.OnCompleteListener;
 import conykais.myplayer.listener.OnErrorListener;
 import conykais.myplayer.listener.OnLoadListener;
+import conykais.myplayer.listener.OnPCMDBListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
@@ -33,6 +34,7 @@ public class Player {
     private OnTimeInfoListenter timeInfoListenter;
     private OnErrorListener errorListener;
     private OnCompleteListener completeListener;
+    private OnPCMDBListener pcmdbListener;
     private static TimeInfo timeInfo;
     private static boolean playNext = false;
     private static int currentVolume = 100;
@@ -69,6 +71,10 @@ public class Player {
 
     public void setCompleteListener(OnCompleteListener completeListener) {
         this.completeListener = completeListener;
+    }
+
+    public void setPcmdbListener(OnPCMDBListener pcmdbListener) {
+        this.pcmdbListener = pcmdbListener;
     }
 
     public void prepare(){
@@ -218,6 +224,13 @@ public class Player {
         if (playNext){
             playNext = false;
             prepare();
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public void onPCMDB(int db){
+        if (pcmdbListener != null){
+            pcmdbListener.onPCMDB(db);
         }
     }
 

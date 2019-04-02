@@ -14,6 +14,7 @@ import conykais.myplayer.TimeUtil;
 import conykais.myplayer.listener.OnCompleteListener;
 import conykais.myplayer.listener.OnErrorListener;
 import conykais.myplayer.listener.OnLoadListener;
+import conykais.myplayer.listener.OnPCMDBListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
@@ -106,6 +107,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete() {
                 Log.d("lbw", "播放完成!");
+            }
+        });
+
+        player.setPcmdbListener(new OnPCMDBListener() {
+            @Override
+            public void onPCMDB(int db) {
+                Log.d("lbw", "pcm db is " + db);
             }
         });
 

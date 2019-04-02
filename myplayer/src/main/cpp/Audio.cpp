@@ -228,6 +228,8 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context)
 
                 audio->callJava->onTimeInfo(CHILD_THREAD,audio->clock,audio->duration);
             }
+            audio->callJava->OnPCMDB(CHILD_THREAD,
+            audio->getPCMDB(reinterpret_cast<char *>(audio->sampleBuffer), buffersize * 2 * 2));
             (* audio-> pcmBufferQueue)->Enqueue( audio->pcmBufferQueue, (char *) audio-> sampleBuffer, buffersize * 2 *2);
         }
     }
@@ -476,5 +478,20 @@ void Audio::setPitch(float pitch) {
     if (soundTouch != NULL){
         soundTouch->setPitch(pitch);
     }
+}
+
+int Audio::getPCMDB(char *pcmchar, size_t pcmsize) {
+    int db = 0;
+    short int pcmvalue = 0;
+    double sum = 0;
+    for (int i = 0; i < pcmsize; i += 2) {
+        memcpy(&pcmvalue,pcmchar + i,2);
+        sum += abs(pcmvalue);
+    }
+    sum = sum / pcmsize / 2;
+    if (sum > 0){
+        db = (int)20.0 * log10(sum);
+    }
+    return db;
 }
 

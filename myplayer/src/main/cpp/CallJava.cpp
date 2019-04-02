@@ -21,6 +21,7 @@ CallJava::CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *job) {
     this->jmid_onTimeInfo = jnienv->GetMethodID(jcl,"onTimeInfo","(II)V");
     this->jmid_onError = jnienv->GetMethodID(jcl,"onError","(ILjava/lang/String;)V");
     this->jmid_onComplete = jnienv->GetMethodID(jcl,"onComplete","()V");
+    this->jmid_onPCMDB = jnienv->GetMethodID(jcl,"onPCMDB","(I)V");
 }
 
 void CallJava::onPrepare(int type) {
@@ -107,6 +108,22 @@ void CallJava::OnComplete(int type) {
             return;
         }
         env->CallVoidMethod(jobj,jmid_onComplete);
+        javaVM->DetachCurrentThread();
+    }
+}
+
+void CallJava::OnPCMDB(int type, int db) {
+
+    if (type == MAIN_THREAD)
+    {
+        jniEnv->CallVoidMethod(jobj,jmid_onPCMDB,db);
+    } else if (type == CHILD_THREAD){
+        JNIEnv *env;
+        if (javaVM->AttachCurrentThread(&env,0) != JNI_OK){
+            LOGE("get child thread jnienv wrong");
+            return;
+        }
+        env->CallVoidMethod(jobj,jmid_onPCMDB,db);
         javaVM->DetachCurrentThread();
     }
 }

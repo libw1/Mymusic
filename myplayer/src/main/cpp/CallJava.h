@@ -22,6 +22,7 @@ public:
     jmethodID jmid_onTimeInfo;
     jmethodID jmid_onError;
     jmethodID jmid_onComplete;
+    jmethodID jmid_onPCMDB;
 
 public:
     CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *jobj);
@@ -36,6 +37,8 @@ public:
     void OnError(int type, int code, char *msg);
 
     void OnComplete(int type);
+
+    void OnPCMDB(int type, int db);
 };
 
 
