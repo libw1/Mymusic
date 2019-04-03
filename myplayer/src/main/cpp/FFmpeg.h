@@ -46,6 +46,7 @@ public:
     void setMute(int mute);
     void setSpeed(float speed);
     void setPitch(float pitch);
+    int getSampleRate();
 };
 
 

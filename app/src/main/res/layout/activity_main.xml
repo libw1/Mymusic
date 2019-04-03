@@ -134,4 +134,9 @@
             android:text="正常播放"
             android:onClick="normal"/>
     </LinearLayout>
+    <Button
+        android:text="开始录制"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="record"/>
 </LinearLayout>

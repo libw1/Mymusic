@@ -294,3 +294,10 @@ void FFmpeg::setPitch(float pitch) {
         audio->setPitch(pitch);
     }
 }
+
+int FFmpeg::getSampleRate() {
+    if (audio != NULL){
+        return audio->codecContext->sample_rate;
+    }
+    return 0;
+}

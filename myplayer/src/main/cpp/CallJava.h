@@ -23,6 +23,7 @@ public:
     jmethodID jmid_onError;
     jmethodID jmid_onComplete;
     jmethodID jmid_onPCMDB;
+    jmethodID jmid_onPcmToAac;
 
 public:
     CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *jobj);
@@ -39,6 +40,8 @@ public:
     void OnComplete(int type);
 
     void OnPCMDB(int type, int db);
+
+    void onPcmToAac(int type, int size, void *buf);
 };
 
 

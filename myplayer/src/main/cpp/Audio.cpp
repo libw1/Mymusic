@@ -143,43 +143,6 @@ int Audio::resampleAudio(void **pcmbuf) {
 }
 
 int Audio::getSoundTouchData() {
-//    while(playstatus != NULL && !playstatus->exit)
-//    {
-//        out_buffer = NULL;
-//        if(finished)
-//        {
-//            finished = false;
-//            data_size = resampleAudio(reinterpret_cast<void **>(&out_buffer));
-//            if(data_size > 0)
-//            {
-//                for(int i = 0; i < data_size / 2 + 1; i++)
-//                {
-//                    sampleBuffer[i] = (out_buffer[i * 2] | ((out_buffer[i * 2 + 1]) << 8));
-//                }
-//                soundTouch->putSamples(sampleBuffer, nb);
-//                num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
-//            } else{
-//                soundTouch->flush();
-//            }
-//        }
-//        if(num == 0)
-//        {
-//            finished = true;
-//            continue;
-//        } else{
-//            if(out_buffer == NULL)
-//            {
-//                num = soundTouch->receiveSamples(sampleBuffer, data_size / 4);
-//                if(num == 0)
-//                {
-//                    finished = true;
-//                    continue;
-//                }
-//            }
-//            return num;
-//        }
-//    }
-//    return 0;
     while (playStatus != NULL && !playStatus->exit){
         out_buffer = NULL;
         if (finished){
@@ -228,6 +191,7 @@ void pcmBufferCallBack(SLAndroidSimpleBufferQueueItf bf, void * context)
 
                 audio->callJava->onTimeInfo(CHILD_THREAD,audio->clock,audio->duration);
             }
+            audio->callJava->onPcmToAac(CHILD_THREAD,buffersize * 4,audio->sampleBuffer);
             audio->callJava->OnPCMDB(CHILD_THREAD,
             audio->getPCMDB(reinterpret_cast<char *>(audio->sampleBuffer), buffersize * 2 * 2));
             (* audio-> pcmBufferQueue)->Enqueue( audio->pcmBufferQueue, (char *) audio-> sampleBuffer, buffersize * 2 *2);

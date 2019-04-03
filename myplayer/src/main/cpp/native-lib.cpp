@@ -156,4 +156,12 @@ Java_conykais_myplayer_player_Player_n_1set_1pitch(JNIEnv *env, jobject instance
         fFmpeg->setPitch(pitch);
     }
 
+}extern "C"
+JNIEXPORT jint JNICALL
+Java_conykais_myplayer_player_Player_n_1samplerate(JNIEnv *env, jobject instance) {
+
+    if (fFmpeg != NULL){
+        return fFmpeg->getSampleRate();
+    }
+    return 0;
 }

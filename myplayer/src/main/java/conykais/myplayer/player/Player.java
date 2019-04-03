@@ -1,7 +1,15 @@
 package conykais.myplayer.player;
 
+import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
+import android.media.MediaFormat;
 import android.text.TextUtils;
 import android.util.Log;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import conykais.myplayer.MuteEnum;
 import conykais.myplayer.TimeInfo;
@@ -125,6 +133,7 @@ public class Player {
 
     public void stop() {
         duration = -1;
+        timeInfo = null;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -141,6 +150,12 @@ public class Player {
         source = url;
         playNext = true;
         stop();
+    }
+
+    public void startRecord(File file){
+        if (n_samplerate() > 0){
+            initMediaCodec(n_samplerate(),file);
+        }
     }
 
     public void setVolume(int volume){
@@ -234,25 +249,158 @@ public class Player {
         }
     }
 
-    public native void n_prepare(String source);
+    private native void n_prepare(String source);
 
-    public native void n_start();
+    private native void n_start();
 
-    public native void n_pause();
+    private native void n_pause();
 
-    public native void n_resume();
+    private native void n_resume();
 
-    public native void n_stop();
+    private native void n_stop();
 
-    public native void n_seek(int secds);
+    private native void n_seek(int secds);
 
-    public native void n_set_volume(int volume);
+    private native void n_set_volume(int volume);
 
-    public native int n_duration();
+    private native int n_duration();
 
-    public native void n_set_mute(int mute);
+    private native void n_set_mute(int mute);
 
-    public native void n_set_speed(float speed);
+    private native void n_set_speed(float speed);
 
-    public native void n_set_pitch(float pitch);
+    private native void n_set_pitch(float pitch);
+
+    private native int n_samplerate();
+
+
+    //MeidaCodec
+    private MediaFormat mediaFormat;
+    private MediaCodec encodec;
+    private FileOutputStream outputStream;
+    private MediaCodec.BufferInfo info;
+    private int pcmdatasize;
+    private byte[] outputBuffer;
+    private int aacsamplerate = 4;
+
+    private void initMediaCodec(int sampleRate, File file){
+        try {
+            aacsamplerate = getADTSsamplerate(sampleRate);
+            mediaFormat = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC,sampleRate,2);
+            mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE,96000);
+            mediaFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+            mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096);
+            encodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
+            if (encodec == null){
+                Log.d("lbw", "initMediaCodec: wrong");
+                return;
+            }
+            info = new MediaCodec.BufferInfo();
+            encodec.configure(mediaFormat,null,null,MediaCodec.CONFIGURE_FLAG_ENCODE);
+            outputStream = new FileOutputStream(file);
+            encodec.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int getADTSsamplerate(int sampleRate) {
+        int rate = 4;
+        switch (sampleRate)
+        {
+            case 96000:
+                rate = 0;
+                break;
+            case 88200:
+                rate = 1;
+                break;
+            case 64000:
+                rate = 2;
+                break;
+            case 48000:
+                rate = 3;
+                break;
+            case 44100:
+                rate = 4;
+                break;
+            case 32000:
+                rate = 5;
+                break;
+            case 24000:
+                rate = 6;
+                break;
+            case 22050:
+                rate = 7;
+                break;
+            case 16000:
+                rate = 8;
+                break;
+            case 12000:
+                rate = 9;
+                break;
+            case 11025:
+                rate = 10;
+                break;
+            case 8000:
+                rate = 11;
+                break;
+            case 7350:
+                rate = 12;
+                break;
+        }
+        return rate;
+    }
+
+
+    @SuppressWarnings("unused")
+    private void encodecPcmToAcc(int size, byte[] buffer){
+        if(buffer != null && encodec != null) {
+            int inputBufferindex = encodec.dequeueInputBuffer(0);
+            if(inputBufferindex >= 0) {
+                ByteBuffer byteBuffer = encodec.getInputBuffers()[inputBufferindex];
+                byteBuffer.clear();
+                byteBuffer.put(buffer);
+                encodec.queueInputBuffer(inputBufferindex, 0, size, 0, 0);
+            }
+
+            int index = encodec.dequeueOutputBuffer(info, 0);
+            while(index >= 0) {
+                try {
+                    pcmdatasize = info.size + 7;
+                    outputBuffer = new byte[pcmdatasize];
+
+                    ByteBuffer byteBuffer = encodec.getOutputBuffers()[index];
+                    byteBuffer.position(info.offset);
+                    byteBuffer.limit(info.offset + info.size);
+
+                    addADtsHeader(outputBuffer, pcmdatasize, aacsamplerate);
+
+                    byteBuffer.get(outputBuffer, 7, info.size);
+                    byteBuffer.position(info.offset);
+                    outputStream.write(outputBuffer, 0, pcmdatasize);
+
+                    encodec.releaseOutputBuffer(index, false);
+                    index = encodec.dequeueOutputBuffer(info, 0);
+                    outputBuffer = null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void addADtsHeader(byte[] packet, int packetLen, int samplerate) {
+
+        int profile = 2; // AAC LC
+        int freqIdx = samplerate; // samplerate
+        int chanCfg = 2; // CPE
+
+        packet[0] = (byte) 0xFF; // 0xFFF(12bit) 这里只取了8位，所以还差4位放到下一个里面
+        packet[1] = (byte) 0xF9; // 第一个t位放F
+        packet[2] = (byte) (((profile - 1) << 6) + (freqIdx << 2) + (chanCfg >> 2));
+        packet[3] = (byte) (((chanCfg & 3) << 6) + (packetLen >> 11));
+        packet[4] = (byte) ((packetLen & 0x7FF) >> 3);
+        packet[5] = (byte) (((packetLen & 7) << 5) + 0x1F);
+        packet[6] = (byte) 0xFC;
+    }
 }
