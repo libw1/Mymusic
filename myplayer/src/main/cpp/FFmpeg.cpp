@@ -301,3 +301,11 @@ int FFmpeg::getSampleRate() {
     }
     return 0;
 }
+
+void FFmpeg::startStopRecord(bool record) {
+
+    if (audio != NULL){
+        audio->startStopRecord(record);
+    }
+
+}

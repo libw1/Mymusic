@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         player.setPcmdbListener(new OnPCMDBListener() {
             @Override
             public void onPCMDB(int db) {
-                Log.d("lbw", "pcm db is " + db);
+//                Log.d("lbw", "pcm db is " + db);
             }
         });
 
@@ -226,5 +226,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void record(View view) {
         player.startRecord(new File("/sdcard/youtube-dl/record.aac"));
+    }
+
+    public void stopRecord(View view) {
+        player.stopRecord();
+    }
+
+    public void resumeRecord(View view) {
+        player.resumeRecord();
+    }
+
+    public void pauseRecord(View view) {
+        player.pauseRecord();
     }
 }

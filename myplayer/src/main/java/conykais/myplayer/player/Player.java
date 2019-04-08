@@ -50,6 +50,7 @@ public class Player {
     private static MuteEnum muteEnum = MuteEnum.MUTE_CENTER;
     private static float speed = 1.0f;
     private static float pitch = 1.0f;
+    private static boolean initMediaCodec = false;
 
     public static final String TAG = "lbw";
     
@@ -153,9 +154,31 @@ public class Player {
     }
 
     public void startRecord(File file){
-        if (n_samplerate() > 0){
-            initMediaCodec(n_samplerate(),file);
+        if (!initMediaCodec){
+            if (n_samplerate() > 0){
+                initMediaCodec = true;
+                initMediaCodec(n_samplerate(),file);
+                n_start_stop_record(true);
+                Log.d(TAG, "startRecord: ");
+            }
         }
+    }
+
+    public void stopRecord(){
+        if (initMediaCodec){
+            n_start_stop_record(false);
+            releaseMedicacodec();
+        }
+    }
+
+    public void pauseRecord(){
+        n_start_stop_record(false);
+        Log.d(TAG, "pauseRecord: ");
+    }
+
+    public void resumeRecord(){
+        n_start_stop_record(true);
+        Log.d(TAG, "resumeRecord: ");
     }
 
     public void setVolume(int volume){
@@ -273,6 +296,8 @@ public class Player {
 
     private native int n_samplerate();
 
+    private native void n_start_stop_record(boolean record);
+
 
     //MeidaCodec
     private MediaFormat mediaFormat;
@@ -301,6 +326,39 @@ public class Player {
             encodec.start();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void releaseMedicacodec() {
+
+        if(encodec == null)
+        {
+            return;
+        }
+        try {
+            outputStream.close();
+            outputStream = null;
+            encodec.stop();
+            encodec.release();
+            encodec = null;
+            mediaFormat = null;
+            info = null;
+            initMediaCodec = false;
+
+            Log.d(TAG, "录制完成...");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if(outputStream != null)
+            {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                outputStream = null;
+            }
         }
     }
 

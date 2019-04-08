@@ -73,6 +73,7 @@ public:
     uint8_t *out_buffer = NULL;
     int nb = 0;
     int num = 0;
+    bool isRecordPcm = false;
 
 public:
     Audio(PlayStatus *playStatus, int sampleRate, CallJava *callJava);
@@ -103,6 +104,8 @@ public:
     void setPitch(float pitch);
 
     int getPCMDB(char *pcmchar, size_t pcmsize);
+
+    void startStopRecord(bool record);
 };
 
 

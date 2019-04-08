@@ -47,6 +47,7 @@ public:
     void setSpeed(float speed);
     void setPitch(float pitch);
     int getSampleRate();
+    void startStopRecord(bool record);
 };
 
 

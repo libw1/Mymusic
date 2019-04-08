@@ -156,7 +156,9 @@ Java_conykais_myplayer_player_Player_n_1set_1pitch(JNIEnv *env, jobject instance
         fFmpeg->setPitch(pitch);
     }
 
-}extern "C"
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_conykais_myplayer_player_Player_n_1samplerate(JNIEnv *env, jobject instance) {
 
@@ -164,4 +166,14 @@ Java_conykais_myplayer_player_Player_n_1samplerate(JNIEnv *env, jobject instance
         return fFmpeg->getSampleRate();
     }
     return 0;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_conykais_myplayer_player_Player_n_1start_1stop_1record(JNIEnv *env, jobject instance,
+                                                            jboolean record) {
+    if (fFmpeg != NULL){
+        fFmpeg->startStopRecord(record);
+    }
+
 }
