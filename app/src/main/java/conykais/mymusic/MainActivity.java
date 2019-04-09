@@ -19,6 +19,7 @@ import conykais.myplayer.listener.OnLoadListener;
 import conykais.myplayer.listener.OnPCMDBListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
+import conykais.myplayer.listener.OnRecordTimeListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
 import conykais.myplayer.player.Player;
 
@@ -157,6 +158,13 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 player.seek(position);
                 isSeekBar = false;
+            }
+        });
+
+        player.setRecordTimeListener(new OnRecordTimeListener() {
+            @Override
+            public void onRecordTime(int time) {
+                Log.d("lbw", "onRecordTime: " + time);
             }
         });
 

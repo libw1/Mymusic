@@ -19,6 +19,7 @@ import conykais.myplayer.listener.OnLoadListener;
 import conykais.myplayer.listener.OnPCMDBListener;
 import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
+import conykais.myplayer.listener.OnRecordTimeListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
 
 public class Player {
@@ -43,6 +44,7 @@ public class Player {
     private OnErrorListener errorListener;
     private OnCompleteListener completeListener;
     private OnPCMDBListener pcmdbListener;
+    private OnRecordTimeListener recordTimeListener;
     private static TimeInfo timeInfo;
     private static boolean playNext = false;
     private static int currentVolume = 100;
@@ -84,6 +86,10 @@ public class Player {
 
     public void setPcmdbListener(OnPCMDBListener pcmdbListener) {
         this.pcmdbListener = pcmdbListener;
+    }
+
+    public void setRecordTimeListener(OnRecordTimeListener recordTimeListener) {
+        this.recordTimeListener = recordTimeListener;
     }
 
     public void prepare(){
@@ -155,9 +161,10 @@ public class Player {
 
     public void startRecord(File file){
         if (!initMediaCodec){
-            if (n_samplerate() > 0){
+            audioSampleRate = n_samplerate();
+            if (audioSampleRate > 0){
                 initMediaCodec = true;
-                initMediaCodec(n_samplerate(),file);
+                initMediaCodec(audioSampleRate,file);
                 n_start_stop_record(true);
                 Log.d(TAG, "startRecord: ");
             }
@@ -307,6 +314,8 @@ public class Player {
     private int pcmdatasize;
     private byte[] outputBuffer;
     private int aacsamplerate = 4;
+    private double recordTime;
+    private int audioSampleRate;
 
     private void initMediaCodec(int sampleRate, File file){
         try {
@@ -320,6 +329,7 @@ public class Player {
                 Log.d("lbw", "initMediaCodec: wrong");
                 return;
             }
+            recordTime = 0;
             info = new MediaCodec.BufferInfo();
             encodec.configure(mediaFormat,null,null,MediaCodec.CONFIGURE_FLAG_ENCODE);
             outputStream = new FileOutputStream(file);
@@ -344,7 +354,7 @@ public class Player {
             mediaFormat = null;
             info = null;
             initMediaCodec = false;
-
+            recordTime = 0;
             Log.d(TAG, "录制完成...");
         } catch (IOException e) {
             e.printStackTrace();
@@ -413,6 +423,10 @@ public class Player {
     @SuppressWarnings("unused")
     private void encodecPcmToAcc(int size, byte[] buffer){
         if(buffer != null && encodec != null) {
+            recordTime += size * 1.0/ (audioSampleRate * 2 * (16 / 8));
+            if (recordTimeListener != null){
+                recordTimeListener.onRecordTime((int) recordTime);
+            }
             int inputBufferindex = encodec.dequeueInputBuffer(0);
             if(inputBufferindex >= 0) {
                 ByteBuffer byteBuffer = encodec.getInputBuffers()[inputBufferindex];
