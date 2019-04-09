@@ -138,9 +138,11 @@ void FFmpeg::start() {
 
     while (playStatus != NULL && !playStatus->exit){
         if (playStatus->seek){
+            av_usleep(1000 * 100);
             continue;
         }
-        if (audio->queue->getQueueSize() > 40){
+        if (audio->queue->getQueueSize() > 100){
+            av_usleep(1000 * 100);
             continue;
         }
         AVPacket *avPacket = av_packet_alloc();
@@ -168,6 +170,7 @@ void FFmpeg::start() {
             av_free(avPacket);
             while (playStatus != NULL && !playStatus->exit){
                 if (audio->queue->getQueueSize() > 0){
+                    av_usleep(1000 * 100);
                     continue;
                 } else{
                     playStatus->exit = true;
