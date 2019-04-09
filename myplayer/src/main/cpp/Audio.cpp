@@ -59,23 +59,27 @@ int Audio::resampleAudio(void **pcmbuf) {
                 callJava->onCallLoad(CHILD_THREAD, false);
             }
         }
-        avPacket = av_packet_alloc();
-        if (queue->getAvPacket(avPacket) != 0){
-            av_packet_free(&avPacket);
-            av_free(avPacket);
-            avPacket = NULL;
-            continue;
+        if (readFrameFinished){
+            avPacket = av_packet_alloc();
+            if (queue->getAvPacket(avPacket) != 0){
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                avPacket = NULL;
+                continue;
+            }
+            ret = avcodec_send_packet(codecContext,avPacket);
+            if (ret != 0){
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                avPacket = NULL;
+                continue;
+            }
         }
-        ret = avcodec_send_packet(codecContext,avPacket);
-        if (ret != 0){
-            av_packet_free(&avPacket);
-            av_free(avPacket);
-            avPacket = NULL;
-            continue;
-        }
+
         avFrame = av_frame_alloc();
         ret = avcodec_receive_frame(codecContext,avFrame);
         if (ret == 0){
+            readFrameFinished = false;
             if (avFrame->channels > 0 && avFrame->channel_layout == 0){
                 avFrame->channel_layout = av_get_default_channel_layout(avFrame->channels);
             } else if (avFrame->channels == 0 && avFrame->channel_layout > 0){
@@ -99,6 +103,7 @@ int Audio::resampleAudio(void **pcmbuf) {
                 av_free(avFrame);
                 avFrame = NULL;
                 swr_free(&swrContext);
+                readFrameFinished = true;
                 continue;
             }
 
@@ -135,6 +140,7 @@ int Audio::resampleAudio(void **pcmbuf) {
             swr_free(&swrContext);
             break;
         } else{
+            readFrameFinished = true;
             av_packet_free(&avPacket);
             av_free(avPacket);
             avPacket = NULL;

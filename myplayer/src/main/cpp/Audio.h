@@ -48,6 +48,7 @@ public:
     int mute = 2;
     float speed = 1.0f;
     float pitch = 1.0f;
+    bool readFrameFinished = true;
 
     // 引擎接口
     SLObjectItf engineObject = NULL;
