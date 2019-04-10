@@ -16,6 +16,7 @@ add_library( # Sets the name of the library.
               src/main/cpp/Audio.cpp
               src/main/cpp/PlayStatus.cpp
               src/main/cpp/Queue.cpp
+              src/main/cpp/Video.cpp
               #sound touch
               src/main/cpp/soundtouch/SoundTouch/AAFilter.cpp
               src/main/cpp/soundtouch/SoundTouch/BPMDetect.cpp

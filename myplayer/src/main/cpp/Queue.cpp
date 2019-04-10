@@ -12,6 +12,8 @@ Queue::Queue(PlayStatus *playStatus) {
 
 Queue::~Queue() {
     clearAvpacket();
+    pthread_mutex_destroy(&mutexPacket);
+    pthread_cond_destroy(&condPacket);
 }
 
 int Queue::putAvPacket(AVPacket *avPacket) {

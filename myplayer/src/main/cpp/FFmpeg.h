@@ -10,6 +10,7 @@
 #include "Audio.h"
 #include "PlayStatus.h"
 #include "pthread.h"
+#include "Video.h"
 
 extern "C"{
 #include <libavformat/avformat.h>
@@ -24,6 +25,7 @@ public:
     pthread_t decodecThread;
     AVFormatContext *formatContext = NULL;
     Audio *audio = NULL;
+    Video *video = NULL;
     PlayStatus *playStatus = NULL;
     pthread_mutex_t init_mutex;
     bool exit = false;
@@ -48,6 +50,7 @@ public:
     void setPitch(float pitch);
     int getSampleRate();
     void startStopRecord(bool record);
+    int getCodecContext(AVCodecParameters *codecpar, AVCodecContext **pCodecContext);
 };
 
 

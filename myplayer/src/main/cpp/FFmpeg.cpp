@@ -73,43 +73,21 @@ void FFmpeg::decodecFFmpegThread() {
                 audio->rational = formatContext->streams[i]->time_base;
                 duration = audio->duration;
             }
+        } else if (formatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
+            if (video == NULL){
+                video = new Video(playStatus,callJava);
+                video->streamIndex = i;
+                video->codecpar = formatContext->streams[i]->codecpar;
+                video->rational = formatContext->streams[i]->time_base;
+            }
         }
     }
 
-    AVCodec *codec = avcodec_find_decoder(audio->codecpar->codec_id);
-    if (!codec){
-        LOGE("can not find codecer");
-        callJava->OnError(CHILD_THREAD,1003,"can not find codecer");
-        exit = true;
-        pthread_mutex_unlock(&init_mutex);
-        return;
+    if (audio != NULL){
+        getCodecContext(audio->codecpar,&audio->codecContext);
     }
-
-    audio->codecContext = avcodec_alloc_context3(codec);
-
-    if (!audio->codecContext){
-        LOGE("can not find codecCtx");
-        callJava->OnError(CHILD_THREAD,1004,"can not find codecCtx");
-        exit = true;
-        pthread_mutex_unlock(&init_mutex);
-        return;
-    }
-
-    if (avcodec_parameters_to_context(audio->codecContext,audio->codecpar) < 0){
-
-        LOGE("can not fill decodecctx");
-        callJava->OnError(CHILD_THREAD,1005,"can not fill decodecctx");
-        exit = true;
-        pthread_mutex_unlock(&init_mutex);
-        return;
-    }
-
-    if (avcodec_open2(audio->codecContext,codec,0) != 0){
-        LOGD("can not open audio streams");
-        callJava->OnError(CHILD_THREAD,1006,"can not open audio streams");
-        exit = true;
-        pthread_mutex_unlock(&init_mutex);
-        return;
+    if (video != NULL){
+        getCodecContext(video->codecpar, &video->codecContext);
     }
 
     if(callJava != NULL)
@@ -133,8 +111,11 @@ void FFmpeg::start() {
     }
 
     audio->play();
+    video->play();
+
 
     int count = 0;
+    int vCount = 0;
 
     while (playStatus != NULL && !playStatus->exit){
         if (playStatus->seek){
@@ -160,7 +141,12 @@ void FFmpeg::start() {
 //                av_free(avPacket);
                 audio->queue->putAvPacket(avPacket);
 
-            } else{
+            }
+            else if(avPacket->stream_index == video->streamIndex) {
+                vCount ++;
+                video->queue->putAvPacket(avPacket);
+                LOGE("解码视频第 %d 帧", vCount);
+            }else{
                 av_packet_free(&avPacket);
                 av_free(avPacket);
             }
@@ -183,16 +169,6 @@ void FFmpeg::start() {
         callJava->OnComplete(CHILD_THREAD);
     }
     exit = true;
-    //模拟出队
-//    while (audio->queue->getQueueSize() > 0)
-//    {
-//        AVPacket *packet = av_packet_alloc();
-//        audio->queue->getAvPacket(packet);
-//        av_packet_free(&packet);
-//        av_free(packet);
-//        packet = NULL;
-//    }
-//    LOGD("解码完成");
 }
 
 FFmpeg::~FFmpeg() {
@@ -236,6 +212,11 @@ void FFmpeg::release() {
         audio->release();
         delete(audio);
         audio = NULL;
+    }
+    if (video != NULL){
+        video->release();
+        delete video;
+        video = NULL;
     }
     if (formatContext != NULL){
         avformat_close_input(&formatContext);
@@ -312,4 +293,43 @@ void FFmpeg::startStopRecord(bool record) {
         audio->startStopRecord(record);
     }
 
+}
+
+int FFmpeg::getCodecContext(AVCodecParameters *codecpar, AVCodecContext **pCodecContext) {
+    AVCodec *codec = avcodec_find_decoder(codecpar->codec_id);
+    if (!codec){
+        LOGE("can not find codecer");
+        callJava->OnError(CHILD_THREAD,1003,"can not find codecer");
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
+        return -1;
+    }
+
+    *pCodecContext = avcodec_alloc_context3(codec);
+
+    if (!*pCodecContext){
+        LOGE("can not find codecCtx");
+        callJava->OnError(CHILD_THREAD,1004,"can not find codecCtx");
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
+        return -1;
+    }
+
+    if (avcodec_parameters_to_context(*pCodecContext,codecpar) < 0){
+
+        LOGE("can not fill decodecctx");
+        callJava->OnError(CHILD_THREAD,1005,"can not fill decodecctx");
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
+        return -1;
+    }
+
+    if (avcodec_open2(*pCodecContext,codec,0) != 0){
+        LOGD("can not open audio streams");
+        callJava->OnError(CHILD_THREAD,1006,"can not open audio streams");
+        exit = true;
+        pthread_mutex_unlock(&init_mutex);
+        return -1;
+    }
+    return 0;
 }
