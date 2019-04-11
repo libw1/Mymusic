@@ -475,4 +475,9 @@ public class Player {
         packet[5] = (byte) (((packetLen & 7) << 5) + 0x1F);
         packet[6] = (byte) 0xFC;
     }
+
+    @SuppressWarnings("unused")
+    private void onCallRenderYUV(int width,int height, byte[] y, byte[] u,byte[] v){
+        Log.d("lbw", "onCallRenderYUV: ");
+    }
 }

@@ -24,6 +24,7 @@ public:
     jmethodID jmid_onComplete;
     jmethodID jmid_onPCMDB;
     jmethodID jmid_onPcmToAac;
+    jmethodID jmid_onRenderYUV;
 
 public:
     CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *jobj);
@@ -42,6 +43,8 @@ public:
     void OnPCMDB(int type, int db);
 
     void onPcmToAac(int type, int size, void *buf);
+
+    void onCallRenderYUV(int width,int height,uint8_t *fy,uint8_t *fu,uint8_t *fv);
 };
 
 

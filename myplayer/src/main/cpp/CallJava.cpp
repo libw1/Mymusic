@@ -23,6 +23,7 @@ CallJava::CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *job) {
     this->jmid_onComplete = jnienv->GetMethodID(jcl,"onComplete","()V");
     this->jmid_onPCMDB = jnienv->GetMethodID(jcl,"onPCMDB","(I)V");
     this->jmid_onPcmToAac = jnienv->GetMethodID(jcl,"encodecPcmToAcc","(I[B)V");
+    this->jmid_onRenderYUV = jnienv->GetMethodID(jcl,"onCallRenderYUV","(II[B[B[B)V");
 }
 
 void CallJava::onPrepare(int type) {
@@ -149,4 +150,24 @@ void CallJava::onPcmToAac(int type, int size, void *buf) {
         env->DeleteLocalRef(jbyteArray);
         javaVM->DetachCurrentThread();
     }
+}
+
+void CallJava::onCallRenderYUV(int width, int height, uint8_t *fy, uint8_t *fu, uint8_t *fv) {
+    JNIEnv *env;
+    if (javaVM->AttachCurrentThread(&env,0) != JNI_OK){
+        LOGE("get child thread jnienv wrong");
+        return;
+    }
+    jbyteArray y = env->NewByteArray(width * height);
+    env->SetByteArrayRegion(y, 0, width * height, reinterpret_cast<const jbyte *>(fy));
+    jbyteArray u = env->NewByteArray(width * height / 4);
+    env->SetByteArrayRegion(y, 0, width * height / 4, reinterpret_cast<const jbyte *>(fu));
+    jbyteArray v = env->NewByteArray(width * height / 4);
+    env->SetByteArrayRegion(y, 0, width * height / 4, reinterpret_cast<const jbyte *>(fv));
+    env->CallVoidMethod(jobj,jmid_onRenderYUV,width,height,y,u,v);
+    env->DeleteLocalRef(y);
+    env->DeleteLocalRef(u);
+    env->DeleteLocalRef(v);
+    javaVM->DetachCurrentThread();
+
 }
