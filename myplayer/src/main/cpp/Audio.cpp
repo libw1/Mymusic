@@ -18,10 +18,11 @@ Audio::Audio(PlayStatus *playStatus, int sampleRate, CallJava *callJava) {
     soundTouch->setChannels(2);
     soundTouch->setPitch(pitch);
     soundTouch->setTempo(speed);
+    pthread_mutex_init(&codecMutex,NULL);
 }
 
 Audio::~Audio() {
-
+    pthread_mutex_destroy(&codecMutex);
 }
 
 void *decodPlay(void *data){
@@ -59,12 +60,14 @@ int Audio::resampleAudio(void **pcmbuf) {
                 callJava->onCallLoad(CHILD_THREAD, false);
             }
         }
+        pthread_mutex_lock(&codecMutex);
         if (readFrameFinished){
             avPacket = av_packet_alloc();
             if (queue->getAvPacket(avPacket) != 0){
                 av_packet_free(&avPacket);
                 av_free(avPacket);
                 avPacket = NULL;
+                pthread_mutex_unlock(&codecMutex);
                 continue;
             }
             ret = avcodec_send_packet(codecContext,avPacket);
@@ -72,6 +75,7 @@ int Audio::resampleAudio(void **pcmbuf) {
                 av_packet_free(&avPacket);
                 av_free(avPacket);
                 avPacket = NULL;
+                pthread_mutex_unlock(&codecMutex);
                 continue;
             }
         }
@@ -104,6 +108,7 @@ int Audio::resampleAudio(void **pcmbuf) {
                 avFrame = NULL;
                 swr_free(&swrContext);
                 readFrameFinished = true;
+                pthread_mutex_unlock(&codecMutex);
                 continue;
             }
 
@@ -138,6 +143,7 @@ int Audio::resampleAudio(void **pcmbuf) {
             av_free(avFrame);
             avFrame = NULL;
             swr_free(&swrContext);
+            pthread_mutex_unlock(&codecMutex);
             break;
         } else{
             readFrameFinished = true;
@@ -147,6 +153,7 @@ int Audio::resampleAudio(void **pcmbuf) {
             av_frame_free(&avFrame);
             av_free(avFrame);
             avFrame = NULL;
+            pthread_mutex_unlock(&codecMutex);
             continue;
         }
     }

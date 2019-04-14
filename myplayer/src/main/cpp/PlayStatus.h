@@ -12,6 +12,7 @@ public:
     bool exit;
     bool load;
     bool seek = false;
+    bool pause = false;
 
 public:
     PlayStatus();

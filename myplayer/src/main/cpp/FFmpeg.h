@@ -33,6 +33,7 @@ public:
     pthread_mutex_t seek_mutex;
 
 
+
 public:
     FFmpeg(PlayStatus* playStatus,CallJava *callJava, const char *source);
     ~FFmpeg();

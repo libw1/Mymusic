@@ -76,6 +76,7 @@ public:
     int nb = 0;
     int num = 0;
     bool isRecordPcm = false;
+    pthread_mutex_t codecMutex;
 
 public:
     Audio(PlayStatus *playStatus, int sampleRate, CallJava *callJava);
