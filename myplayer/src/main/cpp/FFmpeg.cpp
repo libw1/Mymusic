@@ -79,6 +79,14 @@ void FFmpeg::decodecFFmpegThread() {
                 video->streamIndex = i;
                 video->codecpar = formatContext->streams[i]->codecpar;
                 video->rational = formatContext->streams[i]->time_base;
+
+                int num = formatContext->streams[i]->avg_frame_rate.num;
+                int den = formatContext->streams[i]->avg_frame_rate.den;
+                if(num != 0 && den != 0)
+                {
+                    int fps = num / den;//[25 / 1]
+                    video->defaultDelayTime = 1.0 / fps;
+                }
             }
         }
     }
@@ -109,6 +117,12 @@ void FFmpeg::start() {
         LOGE("audio is NULL");
         return;
     }
+    if (video == NULL){
+        LOGE("video is NULL");
+        return;
+    }
+
+    video->audio = audio;
 
     audio->play();
     video->play();

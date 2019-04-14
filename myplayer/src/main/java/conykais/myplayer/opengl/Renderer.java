@@ -150,8 +150,7 @@ public class Renderer implements GLSurfaceView.Renderer {
             u = null;
             v = null;
 
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-
         }
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
     }
 }

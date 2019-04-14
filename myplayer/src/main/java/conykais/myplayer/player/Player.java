@@ -484,7 +484,7 @@ public class Player {
 
     @SuppressWarnings("unused")
     private void onCallRenderYUV(int width,int height, byte[] y, byte[] u,byte[] v){
-        Log.d("lbw", "onCallRenderYUV: ");
+//        Log.d("lbw", "onCallRenderYUV: ");
         if (glSurfaceView != null){
             glSurfaceView.setYUVData(width,height,y,u,v);
         }
