@@ -1,4 +1,4 @@
-package conykais.myplayer.opengl;
+package conykais.myplayer.util;
 
 import android.content.Context;
 import android.opengl.GLES20;

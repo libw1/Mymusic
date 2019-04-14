@@ -22,6 +22,7 @@ import conykais.myplayer.listener.OnPreparedListener;
 import conykais.myplayer.listener.OnRecordTimeListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
 import conykais.myplayer.opengl.GLSurfaceView;
+import conykais.myplayer.util.VideoSupportUitl;
 
 public class Player {
 
@@ -488,5 +489,10 @@ public class Player {
         if (glSurfaceView != null){
             glSurfaceView.setYUVData(width,height,y,u,v);
         }
+    }
+
+    private boolean onCallSupportMediaCodec(String codec){
+        Log.d(TAG, "onCallSupportMediaCodec: ");
+        return VideoSupportUitl.isSupportCodec(codec);
     }
 }

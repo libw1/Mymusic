@@ -124,6 +124,12 @@ void FFmpeg::start() {
 
     video->audio = audio;
 
+    const char *codecName = ((const AVCodec*)(video->codecContext->codec))->name;
+    if (callJava->isSupportCodec(codecName)){
+        LOGD("当前视频支持硬解码!");
+        video->codecType = CODEC_MEDIA_CODEC;
+    }
+
     audio->play();
     video->play();
 

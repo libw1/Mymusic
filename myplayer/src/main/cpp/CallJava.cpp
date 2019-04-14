@@ -24,6 +24,7 @@ CallJava::CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *job) {
     this->jmid_onPCMDB = jnienv->GetMethodID(jcl,"onPCMDB","(I)V");
     this->jmid_onPcmToAac = jnienv->GetMethodID(jcl,"encodecPcmToAcc","(I[B)V");
     this->jmid_onRenderYUV = jnienv->GetMethodID(jcl,"onCallRenderYUV","(II[B[B[B)V");
+    this->jmid_onSupportCodec = jnienv->GetMethodID(jcl, "onCallSupportMediaCodec", "(Ljava/lang/String;)Z");
 }
 
 void CallJava::onPrepare(int type) {
@@ -170,4 +171,18 @@ void CallJava::onCallRenderYUV(int width, int height, uint8_t *fy, uint8_t *fu, 
     env->DeleteLocalRef(v);
     javaVM->DetachCurrentThread();
 
+}
+
+bool CallJava::isSupportCodec(const char *codec) {
+    bool support = false;
+    JNIEnv *env;
+    if (javaVM->AttachCurrentThread(&env,0) != JNI_OK){
+        LOGE("get child thread jnienv wrong");
+        return support;
+    }
+    jstring type = env->NewStringUTF(codec);
+    support = env->CallBooleanMethod(jobj, jmid_onSupportCodec, type);
+    env->DeleteLocalRef(type);
+    javaVM->DetachCurrentThread();
+    return support;
 }

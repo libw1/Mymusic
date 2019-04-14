@@ -25,6 +25,7 @@ public:
     jmethodID jmid_onPCMDB;
     jmethodID jmid_onPcmToAac;
     jmethodID jmid_onRenderYUV;
+    jmethodID jmid_onSupportCodec;
 
 public:
     CallJava(_JavaVM *vm, JNIEnv *jnienv, jobject *jobj);
@@ -45,6 +46,8 @@ public:
     void onPcmToAac(int type, int size, void *buf);
 
     void onCallRenderYUV(int width,int height,uint8_t *fy,uint8_t *fu,uint8_t *fv);
+
+    bool isSupportCodec(const char *codec);
 };
 
 

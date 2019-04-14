@@ -12,6 +12,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import conykais.myplayer.R;
+import conykais.myplayer.util.ShaderUtil;
 
 public class Renderer implements GLSurfaceView.Renderer {
 
