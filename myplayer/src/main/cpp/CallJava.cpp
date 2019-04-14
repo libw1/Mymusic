@@ -161,9 +161,9 @@ void CallJava::onCallRenderYUV(int width, int height, uint8_t *fy, uint8_t *fu, 
     jbyteArray y = env->NewByteArray(width * height);
     env->SetByteArrayRegion(y, 0, width * height, reinterpret_cast<const jbyte *>(fy));
     jbyteArray u = env->NewByteArray(width * height / 4);
-    env->SetByteArrayRegion(y, 0, width * height / 4, reinterpret_cast<const jbyte *>(fu));
+    env->SetByteArrayRegion(u, 0, width * height / 4, reinterpret_cast<const jbyte *>(fu));
     jbyteArray v = env->NewByteArray(width * height / 4);
-    env->SetByteArrayRegion(y, 0, width * height / 4, reinterpret_cast<const jbyte *>(fv));
+    env->SetByteArrayRegion(v, 0, width * height / 4, reinterpret_cast<const jbyte *>(fv));
     env->CallVoidMethod(jobj,jmid_onRenderYUV,width,height,y,u,v);
     env->DeleteLocalRef(y);
     env->DeleteLocalRef(u);

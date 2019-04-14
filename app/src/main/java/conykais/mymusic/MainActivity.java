@@ -21,6 +21,7 @@ import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
 import conykais.myplayer.listener.OnRecordTimeListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
+import conykais.myplayer.opengl.GLSurfaceView;
 import conykais.myplayer.player.Player;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar voiceSeekbar;
     private boolean isSeekBar;
     private int position = 0;
+    private GLSurfaceView glSurfaceView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,15 +45,17 @@ public class MainActivity extends AppCompatActivity {
         voiceText = findViewById(R.id.voice_info);
         playSeekBar = findViewById(R.id.play_seek_bar);
         voiceSeekbar = findViewById(R.id.voice_seek_bar);
+        glSurfaceView = findViewById(R.id.gl_surface_view);
 
         player = new Player();
         player.setVolume(50);
-        player.setMute(MuteEnum.MUTE_RIGHT);
+//        player.setMute(MuteEnum.MUTE_RIGHT);
         voiceText.setText("音量：" + player.getCurrentVolume() + "%");
         voiceSeekbar.setProgress(player.getCurrentVolume());
+        player.setGlSurfaceView(glSurfaceView);
 
-        player.setSpeed(1.5f);
-        player.setPitch(1.5f);
+//        player.setSpeed(1.5f);
+//        player.setPitch(1.5f);
 
         player.setPreparedListener(new OnPreparedListener() {
             @Override
@@ -177,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 //        player.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
 //        player.setSource("http://192.168.0.124/htc.mp3");
 //        player.setSource("/sdcard/youtube-dl/Red.m4a");
-        player.setSource("/sdcard/youtube-dl/b.mp4");
+        player.setSource("/sdcard/youtube-dl/you.mp4");
 //        player.setSource("/sdcard/youtube-dl/bdb.ape");
         player.prepare();
     }

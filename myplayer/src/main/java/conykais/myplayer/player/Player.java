@@ -21,6 +21,7 @@ import conykais.myplayer.listener.OnPauseResumeListener;
 import conykais.myplayer.listener.OnPreparedListener;
 import conykais.myplayer.listener.OnRecordTimeListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
+import conykais.myplayer.opengl.GLSurfaceView;
 
 public class Player {
 
@@ -53,6 +54,7 @@ public class Player {
     private static float speed = 1.0f;
     private static float pitch = 1.0f;
     private static boolean initMediaCodec = false;
+    private GLSurfaceView glSurfaceView;
 
     public static final String TAG = "lbw";
     
@@ -90,6 +92,10 @@ public class Player {
 
     public void setRecordTimeListener(OnRecordTimeListener recordTimeListener) {
         this.recordTimeListener = recordTimeListener;
+    }
+
+    public void setGlSurfaceView(GLSurfaceView glSurfaceView) {
+        this.glSurfaceView = glSurfaceView;
     }
 
     public void prepare(){
@@ -479,5 +485,8 @@ public class Player {
     @SuppressWarnings("unused")
     private void onCallRenderYUV(int width,int height, byte[] y, byte[] u,byte[] v){
         Log.d("lbw", "onCallRenderYUV: ");
+        if (glSurfaceView != null){
+            glSurfaceView.setYUVData(width,height,y,u,v);
+        }
     }
 }

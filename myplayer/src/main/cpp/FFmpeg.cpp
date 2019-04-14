@@ -122,10 +122,10 @@ void FFmpeg::start() {
             av_usleep(1000 * 100);
             continue;
         }
-        if (audio->queue->getQueueSize() > 40){
-            av_usleep(1000 * 100);
-            continue;
-        }
+//        if (audio->queue->getQueueSize() > 40){
+//            av_usleep(1000 * 100);
+//            continue;
+//        }
         AVPacket *avPacket = av_packet_alloc();
         pthread_mutex_lock(&seek_mutex);
         int ret = av_read_frame(formatContext, avPacket);

@@ -7,6 +7,11 @@
     tools:context=".MainActivity"
     android:orientation="vertical">
 
+    <conykais.myplayer.opengl.GLSurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:id="@+id/gl_surface_view"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -49,25 +54,21 @@
     </LinearLayout>
 
     <TextView
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/time_info"/>
 
     <SeekBar
-        android:layout_marginTop="20dp"
         android:id="@+id/play_seek_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/voice_info"/>
 
     <SeekBar
-        android:layout_marginTop="20dp"
         android:id="@+id/voice_seek_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
@@ -75,8 +76,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp">
+        android:orientation="horizontal">
 
         <Button
             android:layout_width="0dp"
@@ -103,8 +103,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp">
+        android:orientation="horizontal">
 
         <Button
             android:layout_width="0dp"
@@ -134,11 +133,11 @@
             android:text="正常播放"
             android:onClick="normal"/>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="20dp">
+        android:orientation="horizontal">
 
         <Button
             android:text="开始录制"
