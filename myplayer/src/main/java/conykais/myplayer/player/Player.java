@@ -5,6 +5,7 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Surface;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -56,6 +57,8 @@ public class Player {
     private static float pitch = 1.0f;
     private static boolean initMediaCodec = false;
     private GLSurfaceView glSurfaceView;
+
+    private Surface surface;
 
     public static final String TAG = "lbw";
     
@@ -494,5 +497,66 @@ public class Player {
     private boolean onCallSupportMediaCodec(String codec){
         Log.d(TAG, "onCallSupportMediaCodec: ");
         return VideoSupportUitl.isSupportCodec(codec);
+    }
+
+    /**
+     * 初始化MediaCodec
+     * @param codecName
+     * @param width
+     * @param height
+     * @param csd_0
+     * @param csd_1
+     */
+    public void initMediaCodec(String codecName, int width, int height, byte[] csd_0, byte[] csd_1)
+    {
+        if(surface != null)
+        {
+            try {
+                String mime = VideoSupportUitl.findVideoCodecName(codecName);
+                mediaFormat = MediaFormat.createVideoFormat(mime, width, height);
+                mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, width * height);
+                mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd_0));
+                mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd_1));
+                Log.d("lbw",mediaFormat.toString());
+                encodec = MediaCodec.createDecoderByType(mime);
+
+                encodec.configure(mediaFormat, surface, null, 0);
+                encodec.start();
+
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            if(errorListener != null)
+            {
+                errorListener.onError(2001, "surface is null");
+            }
+        }
+    }
+
+
+    public void decodeAVPacket(int datasize, byte[] data)
+    {
+        if(surface != null && datasize > 0 && data != null)
+        {
+            int intputBufferIndex = encodec.dequeueInputBuffer(10);
+            if(intputBufferIndex >= 0)
+            {
+                ByteBuffer byteBuffer = encodec.getOutputBuffers()[intputBufferIndex];
+                byteBuffer.clear();
+                byteBuffer.put(data);
+                encodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
+            }
+            int outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
+            while(outputBufferIndex >= 0)
+            {
+                encodec.releaseOutputBuffer(outputBufferIndex, true);
+                outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
+            }
+        }
     }
 }

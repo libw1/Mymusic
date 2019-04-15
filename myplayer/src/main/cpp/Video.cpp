@@ -59,6 +59,13 @@ void *playVideo(void *data){
             while(av_bsf_receive_packet(video->abs_ctx, avPacket) == 0)
             {
                 LOGE("开始解码");
+
+                double diff = video->getFrameDiffTime(NULL, avPacket);
+                LOGE("diff is %f", diff);
+
+                av_usleep(video->getDelayTime(diff) * 1000000);
+                video->callJava->onCallDecodeAVPacket(avPacket->size, avPacket->data);
+
                 av_packet_free(&avPacket);
                 av_free(avPacket);
                 continue;
@@ -88,7 +95,7 @@ void *playVideo(void *data){
             }
             if (avFrame->format == AV_PIX_FMT_YUV420P){
                 LOGD("当前是YUV420P");
-                double diff = video->getFrameDiffTime(avFrame);
+                double diff = video->getFrameDiffTime(avFrame,NULL);
                 LOGD("diff is %f",diff);
 
                 av_usleep(video->getDelayTime(diff) * 1000000);
@@ -143,7 +150,7 @@ void *playVideo(void *data){
                           frameYUV420P->data,
                           frameYUV420P->linesize);
 
-                double diff = video->getFrameDiffTime(avFrame);
+                double diff = video->getFrameDiffTime(avFrame,NULL);
                 LOGD("diff is %f",diff);
 
                 av_usleep(video->getDelayTime(diff) * 1000000);
@@ -185,6 +192,11 @@ void Video::release() {
         queue = NULL;
     }
 
+    if(abs_ctx != NULL)
+    {
+        av_bsf_free(&abs_ctx);
+        abs_ctx = NULL;
+    }
     if (codecContext != NULL){
         pthread_mutex_lock(&codecMutex);
         avcodec_close(codecContext);
@@ -201,16 +213,27 @@ void Video::release() {
 
 }
 
-double Video::getFrameDiffTime(AVFrame *avFrame) {
-    double pts = av_frame_get_best_effort_timestamp(avFrame);
-    if (pts == AV_NOPTS_VALUE){
+double Video::getFrameDiffTime(AVFrame *avFrame, AVPacket *avPacket) {
+    double pts = 0;
+    if(avFrame != NULL)
+    {
+        pts = av_frame_get_best_effort_timestamp(avFrame);
+    }
+    if(avPacket != NULL)
+    {
+        pts = avPacket->pts;
+    }
+    if(pts == AV_NOPTS_VALUE)
+    {
         pts = 0;
     }
-
     pts *= av_q2d(rational);
-    if (pts > 0){
+
+    if(pts > 0)
+    {
         clock = pts;
     }
+
     double diff = audio->clock - clock;
     return diff;
 }

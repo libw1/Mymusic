@@ -162,9 +162,18 @@ void FFmpeg::start() {
     }
 
     end:
-    supportMediacodec = false;
+//    supportMediacodec = false;
     if (supportMediacodec){
         video->codecType = CODEC_MEDIA_CODEC;
+        video->callJava->onCallInitMediacodec(
+                codecName,
+                video->codecContext->width,
+                video->codecContext->height,
+                video->codecContext->extradata_size,
+                video->codecContext->extradata_size,
+                video->codecContext->extradata,
+                video->codecContext->extradata
+        );
     }
     audio->play();
     video->play();
