@@ -23,6 +23,7 @@ import conykais.myplayer.listener.OnPreparedListener;
 import conykais.myplayer.listener.OnRecordTimeListener;
 import conykais.myplayer.listener.OnTimeInfoListenter;
 import conykais.myplayer.opengl.GLSurfaceView;
+import conykais.myplayer.opengl.Renderer;
 import conykais.myplayer.util.VideoSupportUitl;
 
 public class Player {
@@ -100,6 +101,15 @@ public class Player {
 
     public void setGlSurfaceView(GLSurfaceView glSurfaceView) {
         this.glSurfaceView = glSurfaceView;
+        glSurfaceView.getRenderer().setOnSurfaceCreateListener(new Renderer.OnSurfaceCreateListener() {
+            @Override
+            public void onSurfaceCreate(Surface s) {
+                if (source == null) {
+                    surface = s;
+                    Log.d("lbw", "onSurfaceCreate");
+                }
+            }
+        });
     }
 
     public void prepare(){
@@ -356,8 +366,10 @@ public class Player {
             return;
         }
         try {
-            outputStream.close();
-            outputStream = null;
+            if (outputStream != null) {
+                outputStream.close();
+                outputStream = null;
+            }
             encodec.stop();
             encodec.release();
             encodec = null;
@@ -365,7 +377,6 @@ public class Player {
             info = null;
             initMediaCodec = false;
             recordTime = 0;
-            Log.d(TAG, "录制完成...");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -490,6 +501,7 @@ public class Player {
     private void onCallRenderYUV(int width,int height, byte[] y, byte[] u,byte[] v){
 //        Log.d("lbw", "onCallRenderYUV: ");
         if (glSurfaceView != null){
+            glSurfaceView.getRenderer().setRenderType(Renderer.RENDER_YUV);
             glSurfaceView.setYUVData(width,height,y,u,v);
         }
     }
@@ -507,11 +519,10 @@ public class Player {
      * @param csd_0
      * @param csd_1
      */
-    public void initMediaCodec(String codecName, int width, int height, byte[] csd_0, byte[] csd_1)
-    {
-        if(surface != null)
-        {
+    public void initMediaCodec(String codecName, int width, int height, byte[] csd_0, byte[] csd_1){
+        if(surface != null){
             try {
+                glSurfaceView.getRenderer().setRenderType(Renderer.RENDER_MEDIACODEC);
                 String mime = VideoSupportUitl.findVideoCodecName(codecName);
                 mediaFormat = MediaFormat.createVideoFormat(mime, width, height);
                 mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, width * height);
@@ -520,40 +531,31 @@ public class Player {
                 Log.d("lbw",mediaFormat.toString());
                 encodec = MediaCodec.createDecoderByType(mime);
 
+                info = new MediaCodec.BufferInfo();
                 encodec.configure(mediaFormat, surface, null, 0);
                 encodec.start();
 
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e){
                 e.printStackTrace();
             }
-        }
-        else
-        {
-            if(errorListener != null)
-            {
+        } else {
+            if(errorListener != null) {
                 errorListener.onError(2001, "surface is null");
             }
         }
     }
 
-
-    public void decodeAVPacket(int datasize, byte[] data)
-    {
-        if(surface != null && datasize > 0 && data != null)
-        {
+    public void decodeAVPacket(int datasize, byte[] data){
+        if(surface != null && datasize > 0 && data != null && encodec != null){
             int intputBufferIndex = encodec.dequeueInputBuffer(10);
-            if(intputBufferIndex >= 0)
-            {
-                ByteBuffer byteBuffer = encodec.getOutputBuffers()[intputBufferIndex];
+            if(intputBufferIndex >= 0){
+                ByteBuffer byteBuffer = encodec.getInputBuffers()[intputBufferIndex];
                 byteBuffer.clear();
                 byteBuffer.put(data);
                 encodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
             }
             int outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
-            while(outputBufferIndex >= 0)
-            {
+            while(outputBufferIndex >= 0){
                 encodec.releaseOutputBuffer(outputBufferIndex, true);
                 outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
             }

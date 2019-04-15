@@ -16,6 +16,12 @@ public class GLSurfaceView extends android.opengl.GLSurfaceView{
         renderer = new conykais.myplayer.opengl.Renderer(context);
         setRenderer(renderer);
         setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        renderer.setOnRenderListener(new conykais.myplayer.opengl.Renderer.OnRenderListener() {
+            @Override
+            public void onRender() {
+                requestRender();
+            }
+        });
     }
 
     public void setYUVData(int width, int height, byte[] y, byte[] u, byte[] v){
@@ -26,5 +32,7 @@ public class GLSurfaceView extends android.opengl.GLSurfaceView{
         }
     }
 
-
+    public conykais.myplayer.opengl.Renderer getRenderer() {
+        return renderer;
+    }
 }
