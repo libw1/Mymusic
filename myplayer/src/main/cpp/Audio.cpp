@@ -28,13 +28,14 @@ Audio::~Audio() {
 void *decodPlay(void *data){
     Audio *audio = (Audio *)(data);
     audio->initOpenSLES();
-    pthread_exit(&audio->playThread);
+    return 0;
 }
 
 
 void Audio::play() {
-    pthread_create(&playThread,NULL,decodPlay,this);
-
+    if (playStatus != NULL && !playStatus->exit){
+        pthread_create(&playThread,NULL,decodPlay,this);
+    }
 }
 
 int Audio::resampleAudio(void **pcmbuf) {
@@ -353,6 +354,11 @@ void Audio::stop() {
 }
 
 void Audio::release() {
+    if(queue != NULL)
+    {
+        queue->noticeQueue();
+    }
+    pthread_join(playThread, NULL);
     stop();
     if (queue != NULL){
         delete(queue);

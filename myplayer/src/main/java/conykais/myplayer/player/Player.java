@@ -165,6 +165,7 @@ public class Player {
             @Override
             public void run() {
                 n_stop();
+                releaseMedicacodec();
             }
         }).start();
     }
@@ -370,6 +371,7 @@ public class Player {
                 outputStream.close();
                 outputStream = null;
             }
+            encodec.flush();
             encodec.stop();
             encodec.release();
             encodec = null;
@@ -377,7 +379,7 @@ public class Player {
             info = null;
             initMediaCodec = false;
             recordTime = 0;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         finally {
@@ -547,17 +549,22 @@ public class Player {
 
     public void decodeAVPacket(int datasize, byte[] data){
         if(surface != null && datasize > 0 && data != null && encodec != null){
-            int intputBufferIndex = encodec.dequeueInputBuffer(10);
-            if(intputBufferIndex >= 0){
-                ByteBuffer byteBuffer = encodec.getInputBuffers()[intputBufferIndex];
-                byteBuffer.clear();
-                byteBuffer.put(data);
-                encodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
-            }
-            int outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
-            while(outputBufferIndex >= 0){
-                encodec.releaseOutputBuffer(outputBufferIndex, true);
-                outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
+            try{
+                int intputBufferIndex = encodec.dequeueInputBuffer(10);
+                if(intputBufferIndex >= 0){
+                    ByteBuffer byteBuffer = encodec.getInputBuffers()[intputBufferIndex];
+                    byteBuffer.clear();
+                    byteBuffer.put(data);
+                    encodec.queueInputBuffer(intputBufferIndex, 0, datasize, 0, 0);
+                }
+                int outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
+                while(outputBufferIndex >= 0){
+                    encodec.releaseOutputBuffer(outputBufferIndex, true);
+                    outputBufferIndex = encodec.dequeueOutputBuffer(info, 10);
+                }
+
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
     }

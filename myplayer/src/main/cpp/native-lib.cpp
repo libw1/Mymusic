@@ -41,7 +41,7 @@ Java_conykais_myplayer_player_Player_n_1prepare(JNIEnv *env, jobject instance, j
 void *startCallback(void *data){
     FFmpeg *fFmpeg = (FFmpeg *)(data);
     fFmpeg->start();
-    pthread_exit(&thread_start);
+    return 0;
 }
 
 extern "C"
@@ -84,6 +84,7 @@ Java_conykais_myplayer_player_Player_n_1stop(JNIEnv *env, jobject instance) {
     nexit = false;
     if (fFmpeg != NULL){
         fFmpeg->release();
+        pthread_join(thread_start, NULL);
         delete (fFmpeg);
         fFmpeg = NULL;
         if (callJava != NULL){

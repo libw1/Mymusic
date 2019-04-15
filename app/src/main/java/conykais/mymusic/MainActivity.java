@@ -205,7 +205,8 @@ public class MainActivity extends AppCompatActivity {
 //        player.playNext("/sdcard/youtube-dl/Red.m4a");
 //        player.playNext("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
 //        player.playNext("http://ngcdn004.cnr.cn/live/dszs/index12.m3u8");
-        player.playNext("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
+//        player.playNext("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
+        player.playNext("/sdcard/youtube-dl/you.mp4");
     }
 
     public void right(View view) {
