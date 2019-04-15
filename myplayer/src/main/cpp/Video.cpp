@@ -49,10 +49,20 @@ void *playVideo(void *data){
             continue;
         }
         if (video->codecType == CODEC_MEDIA_CODEC){
-
-            LOGD("硬解码视频");
-            av_packet_free(&avPacket);
-            av_free(avPacket);
+            if(av_bsf_send_packet(video->abs_ctx, avPacket) != 0)
+            {
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                avPacket = NULL;
+                continue;
+            }
+            while(av_bsf_receive_packet(video->abs_ctx, avPacket) == 0)
+            {
+                LOGE("开始解码");
+                av_packet_free(&avPacket);
+                av_free(avPacket);
+                continue;
+            }
             avPacket = NULL;
 
         } else if(video->codecType == CODEC_YUV){

@@ -41,6 +41,7 @@ public:
     pthread_mutex_t codecMutex;
 
     int codecType = CODEC_YUV;
+    AVBSFContext *abs_ctx = NULL;
 
 public:
     Video(PlayStatus *playStatus,CallJava *callJava);

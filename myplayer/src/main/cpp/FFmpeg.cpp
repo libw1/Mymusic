@@ -125,11 +125,47 @@ void FFmpeg::start() {
     video->audio = audio;
 
     const char *codecName = ((const AVCodec*)(video->codecContext->codec))->name;
-    if (callJava->isSupportCodec(codecName)){
+    if (supportMediacodec = callJava->isSupportCodec(codecName)){
         LOGD("当前视频支持硬解码!");
-        video->codecType = CODEC_MEDIA_CODEC;
+        if(strcasecmp(codecName, "h264") == 0)
+        {
+            bsFilter = av_bsf_get_by_name("h264_mp4toannexb");
+        }
+        else if(strcasecmp(codecName, "h265") == 0)
+        {
+            bsFilter = av_bsf_get_by_name("hevc_mp4toannexb");
+        }
+        if(bsFilter == NULL)
+        {
+            goto end;
+        }
+        if(av_bsf_alloc(bsFilter, &video->abs_ctx) != 0)
+        {
+            supportMediacodec = false;
+            goto end;
+        }
+        if(avcodec_parameters_copy(video->abs_ctx->par_in, video->codecpar) < 0)
+        {
+            supportMediacodec = false;
+            av_bsf_free(&video->abs_ctx);
+            video->abs_ctx = NULL;
+            goto end;
+        }
+        if(av_bsf_init(video->abs_ctx) != 0)
+        {
+            supportMediacodec = false;
+            av_bsf_free(&video->abs_ctx);
+            video->abs_ctx = NULL;
+            goto end;
+        }
+        video->abs_ctx->time_base_in = video->rational;
     }
 
+    end:
+    supportMediacodec = false;
+    if (supportMediacodec){
+        video->codecType = CODEC_MEDIA_CODEC;
+    }
     audio->play();
     video->play();
 

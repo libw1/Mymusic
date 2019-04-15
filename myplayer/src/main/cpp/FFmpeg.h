@@ -32,6 +32,8 @@ public:
     int duration = 0;
     pthread_mutex_t seek_mutex;
 
+    const AVBitStreamFilter *bsFilter = NULL;
+    bool supportMediacodec = false;
 
 
 public:
