@@ -124,6 +124,7 @@ void FFmpeg::start() {
     video->audio = audio;
 
     const char *codecName = ((const AVCodec*)(video->codecContext->codec))->name;
+    LOGD("codec name %s",codecName);
     if (supportMediacodec = callJava->isSupportCodec(codecName)){
         LOGD("当前视频支持硬解码!");
         if(strcasecmp(codecName, "h264") == 0)
@@ -133,6 +134,18 @@ void FFmpeg::start() {
         else if(strcasecmp(codecName, "h265") == 0)
         {
             bsFilter = av_bsf_get_by_name("hevc_mp4toannexb");
+        }
+        else if (strcasecmp(codecName,"mpeg4") == 0)
+        {
+            bsFilter = av_bsf_get_by_name("mpeg4_unpack_bframes");
+        }
+        else if (strcasecmp(codecName,"vp9") == 0)
+        {
+            bsFilter = av_bsf_get_by_name("vp9_superframe");
+        }
+        else
+        {
+            bsFilter = av_bsf_get_by_name("null");
         }
         if(bsFilter == NULL)
         {

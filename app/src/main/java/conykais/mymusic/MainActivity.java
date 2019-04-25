@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import java.io.File;
 
-import conykais.myplayer.Demo;
 import conykais.myplayer.MuteEnum;
 import conykais.myplayer.TimeInfo;
 import conykais.myplayer.TimeUtil;
@@ -183,7 +182,8 @@ public class MainActivity extends AppCompatActivity {
 //        player.setSource("/sdcard/youtube-dl/Red.m4a");
 //        player.setSource("/sdcard/youtube-dl/you.mp4");
 //        player.setSource("/sdcard/youtube-dl/waypoint.mp4");
-        player.setSource("/sdcard/youtube-dl/1080.mp4");
+        player.setSource("/sdcard/youtube-dl/1080sh.mp4");
+//        player.setSource("/sdcard/youtube-dl/测试.h265");
 //        player.setSource("/sdcard/youtube-dl/cq.mp4");
 //        player.setSource("/sdcard/youtube-dl/bdb.ape");
         player.prepare();
