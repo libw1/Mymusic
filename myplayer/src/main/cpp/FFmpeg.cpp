@@ -131,7 +131,7 @@ void FFmpeg::start() {
         {
             bsFilter = av_bsf_get_by_name("h264_mp4toannexb");
         }
-        else if(strcasecmp(codecName, "h265") == 0)
+        else if(strcasecmp(codecName, "hevc") == 0)
         {
             bsFilter = av_bsf_get_by_name("hevc_mp4toannexb");
         }

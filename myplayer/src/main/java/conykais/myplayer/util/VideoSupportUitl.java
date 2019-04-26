@@ -14,7 +14,7 @@ public class VideoSupportUitl {
         codecMap.put("h264","video/avc");
         codecMap.put("mpeg4","video/mp4v-es");
         codecMap.put("vp9","video/x-vnd.on2.vp9");
-        codecMap.put("h265","video/hevc");
+        codecMap.put("hevc","video/hevc");
         codecMap.put("vp8","video/x-vnd.on2.vp8");
         codecMap.put("h263","video/3gpp");
     }
@@ -37,6 +37,7 @@ public class VideoSupportUitl {
                 if(types[j].equals(findVideoCodecName(codecName)))
                 {
                     support = true;
+                    Log.d("lbw", "SupportCodec: " + types[j]);
 //                    break;
                 }
             }
