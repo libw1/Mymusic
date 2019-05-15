@@ -61,7 +61,7 @@ public class Player {
 
     private Surface surface;
 
-    public static final String TAG = "lbw";
+    public static final String TAG = "player";
     
     public void setSource(String source){
         this.source = source;
@@ -347,7 +347,7 @@ public class Player {
             mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096);
             encodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_AUDIO_AAC);
             if (encodec == null){
-                Log.d("lbw", "initMediaCodec: wrong");
+                Log.d(TAG, "initMediaCodec: wrong");
                 return;
             }
             recordTime = 0;
@@ -490,8 +490,8 @@ public class Player {
         int freqIdx = samplerate; // samplerate
         int chanCfg = 2; // CPE
 
-        packet[0] = (byte) 0xFF; // 0xFFF(12bit) 这里只取了8位，所以还差4位放到下一个里面
-        packet[1] = (byte) 0xF9; // 第一个t位放F
+        packet[0] = (byte) 0xFF;
+        packet[1] = (byte) 0xF9;
         packet[2] = (byte) (((profile - 1) << 6) + (freqIdx << 2) + (chanCfg >> 2));
         packet[3] = (byte) (((chanCfg & 3) << 6) + (packetLen >> 11));
         packet[4] = (byte) ((packetLen & 0x7FF) >> 3);
@@ -530,7 +530,7 @@ public class Player {
                 mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, width * height);
                 mediaFormat.setByteBuffer("csd-0", ByteBuffer.wrap(csd_0));
                 mediaFormat.setByteBuffer("csd-1", ByteBuffer.wrap(csd_1));
-                Log.d("lbw",mediaFormat.toString());
+                Log.d(TAG,mediaFormat.toString());
                 encodec = MediaCodec.createDecoderByType(mime);
 
                 info = new MediaCodec.BufferInfo();
