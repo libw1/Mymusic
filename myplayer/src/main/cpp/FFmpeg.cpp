@@ -117,78 +117,82 @@ void FFmpeg::start() {
         return;
     }
     if (video == NULL){
+        isOnlyAudio = true;
         LOGE("video is NULL");
-        return;
     }
 
-    video->audio = audio;
-
-    const char *codecName = ((const AVCodec*)(video->codecContext->codec))->name;
-    LOGD("codec name %s",codecName);
-    if (supportMediacodec = callJava->isSupportCodec(codecName)){
-        LOGD("当前视频支持硬解码!");
-        if(strcasecmp(codecName, "h264") == 0)
-        {
-            bsFilter = av_bsf_get_by_name("h264_mp4toannexb");
+    if (!isOnlyAudio){
+        video->audio = audio;
+        const char *codecName = ((const AVCodec*)(video->codecContext->codec))->name;
+        LOGD("codec name %s",codecName);
+        if (supportMediacodec = callJava->isSupportCodec(codecName)){
+            LOGD("当前视频支持硬解码!");
+            if(strcasecmp(codecName, "h264") == 0)
+            {
+                bsFilter = av_bsf_get_by_name("h264_mp4toannexb");
+            }
+            else if(strcasecmp(codecName, "hevc") == 0)
+            {
+                bsFilter = av_bsf_get_by_name("hevc_mp4toannexb");
+            }
+            else if (strcasecmp(codecName,"mpeg4") == 0)
+            {
+                bsFilter = av_bsf_get_by_name("mpeg4_unpack_bframes");
+            }
+            else if (strcasecmp(codecName,"vp9") == 0)
+            {
+                bsFilter = av_bsf_get_by_name("vp9_superframe");
+            }
+            else
+            {
+                bsFilter = av_bsf_get_by_name("null");
+            }
+            if(bsFilter == NULL)
+            {
+                goto end;
+            }
+            if(av_bsf_alloc(bsFilter, &video->abs_ctx) != 0)
+            {
+                supportMediacodec = false;
+                goto end;
+            }
+            if(avcodec_parameters_copy(video->abs_ctx->par_in, video->codecpar) < 0)
+            {
+                supportMediacodec = false;
+                av_bsf_free(&video->abs_ctx);
+                video->abs_ctx = NULL;
+                goto end;
+            }
+            if(av_bsf_init(video->abs_ctx) != 0)
+            {
+                supportMediacodec = false;
+                av_bsf_free(&video->abs_ctx);
+                video->abs_ctx = NULL;
+                goto end;
+            }
+            video->abs_ctx->time_base_in = video->rational;
         }
-        else if(strcasecmp(codecName, "hevc") == 0)
-        {
-            bsFilter = av_bsf_get_by_name("hevc_mp4toannexb");
-        }
-        else if (strcasecmp(codecName,"mpeg4") == 0)
-        {
-            bsFilter = av_bsf_get_by_name("mpeg4_unpack_bframes");
-        }
-        else if (strcasecmp(codecName,"vp9") == 0)
-        {
-            bsFilter = av_bsf_get_by_name("vp9_superframe");
-        }
-        else
-        {
-            bsFilter = av_bsf_get_by_name("null");
-        }
-        if(bsFilter == NULL)
-        {
-            goto end;
-        }
-        if(av_bsf_alloc(bsFilter, &video->abs_ctx) != 0)
-        {
-            supportMediacodec = false;
-            goto end;
-        }
-        if(avcodec_parameters_copy(video->abs_ctx->par_in, video->codecpar) < 0)
-        {
-            supportMediacodec = false;
-            av_bsf_free(&video->abs_ctx);
-            video->abs_ctx = NULL;
-            goto end;
-        }
-        if(av_bsf_init(video->abs_ctx) != 0)
-        {
-            supportMediacodec = false;
-            av_bsf_free(&video->abs_ctx);
-            video->abs_ctx = NULL;
-            goto end;
-        }
-        video->abs_ctx->time_base_in = video->rational;
-    }
-
-    end:
+        end:
 //    supportMediacodec = false;
-    if (supportMediacodec){
-        video->codecType = CODEC_MEDIA_CODEC;
-        video->callJava->onCallInitMediacodec(
-                codecName,
-                video->codecContext->width,
-                video->codecContext->height,
-                video->codecContext->extradata_size,
-                video->codecContext->extradata_size,
-                video->codecContext->extradata,
-                video->codecContext->extradata
-        );
+        if (supportMediacodec){
+            video->codecType = CODEC_MEDIA_CODEC;
+            video->callJava->onCallInitMediacodec(
+                    codecName,
+                    video->codecContext->width,
+                    video->codecContext->height,
+                    video->codecContext->extradata_size,
+                    video->codecContext->extradata_size,
+                    video->codecContext->extradata,
+                    video->codecContext->extradata
+            );
+        }
     }
+
+
     audio->play();
-    video->play();
+    if (!isOnlyAudio){
+        video->play();
+    }
 
 
     int count = 0;

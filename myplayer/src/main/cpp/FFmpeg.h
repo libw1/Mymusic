@@ -34,6 +34,7 @@ public:
 
     const AVBitStreamFilter *bsFilter = NULL;
     bool supportMediacodec = false;
+    bool isOnlyAudio = false;
 
 
 public:
