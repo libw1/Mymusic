@@ -174,15 +174,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void begin(View view) {
-//        player.setSource("http://mpge.5nd.com/2015/2015-11-26/69708/1.mp3");
+//        player.setSource("https://xinhudev.simu800.com/xh/sign-manager/files/video/20220706/d49d04ad0aee47d294b29bcefe25f6a2.mp4");
 //        player.setSource("/sdcard/youtube-dl/lovestory.m4a");
 //        player.setSource("/sdcard/youtube-dl/22.m4a");
 //        player.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
+//        player.setSource("http://ngcdn004.cnr.cn/live/dszs/index.m3u8");
 //        player.setSource("http://192.168.0.124/htc.mp3");
-//        player.setSource("/sdcard/youtube-dl/Red.m4a");
-//        player.setSource("/sdcard/youtube-dl/you.mp4");
+//        player.setSource("/sdcard/meix/2021-09-09-11-15-52.mp4");
+//        player.setSource("/sdcard/DCIM/Camera/VID_20210929_165136_8K.mp4");
+//        player.setSource("/sdcard/DCIM/Camera/VID_20230308_175338.mp4");
+//        player.setSource("/sdcard/DCIM/Camera/VID_20210915_102200.mp4");
+        player.setSource("/sdcard/video.mp4");
 //        player.setSource("/sdcard/youtube-dl/waypoint.mp4");
-        player.setSource("/sdcard/youtube-dl/1080sh.mp4");
+//        player.setSource("/sdcard/youtube-dl/1080sh.mp4");
 //        player.setSource("/sdcard/youtube-dl/测试.h265");
 //        player.setSource("/sdcard/youtube-dl/cq.mp4");
 //        player.setSource("/sdcard/youtube-dl/bdb.ape");

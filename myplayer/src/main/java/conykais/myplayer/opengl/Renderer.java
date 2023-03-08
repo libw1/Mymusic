@@ -5,6 +5,7 @@ import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 import android.view.Surface;
 
 import java.nio.ByteBuffer;
@@ -64,6 +65,15 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     private int afPosition_mediacodec;
     private int samplerOES_mediacodec;
     private int textureId_mediacodec;
+
+    private float[] mMatrix;
+    private int mVertexMatrixHandler;//矩阵变化接受者
+
+    private int mWorldWidth = -1;
+    private int mWorldHeight = -1;
+    private int mVideoWidth = -1;
+    private int mVideoHeight = -1;
+
     private SurfaceTexture surfaceTexture;
     private Surface surface;
 
@@ -83,6 +93,13 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
 
     }
 
+    public void setVideoHeight(int mVideoHeight) {
+        this.mVideoHeight = mVideoHeight;
+    }
+
+    public void setVideoWidth(int mVideoWidth) {
+        this.mVideoWidth = mVideoWidth;
+    }
 
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
@@ -93,6 +110,8 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         GLES20.glViewport(0,0,width,height);
+        this.mWorldWidth = width;
+        this.mWorldHeight = height;
     }
 
     public void setOnSurfaceCreateListener(OnSurfaceCreateListener onSurfaceCreateListener) {
@@ -126,6 +145,7 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
 
         avPosition_yuv = GLES20.glGetAttribLocation(program_yuv,"av_Position");
         afPosition_yuv = GLES20.glGetAttribLocation(program_yuv,"af_Position");
+        mVertexMatrixHandler = GLES20.glGetUniformLocation(program_mediacodec, "uMatrix");
 
         sample_y = GLES20.glGetUniformLocation(program_yuv,"sampler_y");
         sample_u = GLES20.glGetUniformLocation(program_yuv,"sampler_u");
@@ -147,6 +167,8 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     public void setYUVRendererData(int width, int height, byte[] y,byte[] u,byte[]v){
         this.width_yuv = width;
         this.height_yuv = height;
+        setVideoWidth(width);
+        setVideoHeight(height);
         this.y = ByteBuffer.wrap(y);
         this.u = ByteBuffer.wrap(u);
         this.v = ByteBuffer.wrap(v);
@@ -155,6 +177,7 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     private void renderYUV(){
         if (width_yuv > 0 && height_yuv > 0 && y != null && u != null && v != null) {
 
+            initDefMatrix();
             GLES20.glUseProgram(program_yuv);
             GLES20.glEnableVertexAttribArray(avPosition_yuv);
             GLES20.glVertexAttribPointer(avPosition_yuv, 2, GLES20.GL_FLOAT, false, 8, vertexBuffer);
@@ -179,6 +202,8 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
             GLES20.glUniform1i(sample_u, 1);
             GLES20.glUniform1i(sample_v, 2);
 
+            GLES20.glUniformMatrix4fv(mVertexMatrixHandler, 1, false, mMatrix, 0);
+
             y.clear();
             u.clear();
             v.clear();
@@ -197,6 +222,7 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
         avPosition_mediacodec = GLES20.glGetAttribLocation(program_mediacodec, "av_Position");
         afPosition_mediacodec = GLES20.glGetAttribLocation(program_mediacodec, "af_Position");
         samplerOES_mediacodec = GLES20.glGetUniformLocation(program_mediacodec, "sTexture");
+        mVertexMatrixHandler = GLES20.glGetUniformLocation(program_mediacodec, "uMatrix");
 
         int[] textureids = new int[1];
         GLES20.glGenTextures(1, textureids, 0);
@@ -218,18 +244,68 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     }
 
     private void renderMediacodec(){
-        surfaceTexture.updateTexImage();
+        initDefMatrix();
         GLES20.glUseProgram(program_mediacodec);
 
         GLES20.glEnableVertexAttribArray(avPosition_mediacodec);
-        GLES20.glVertexAttribPointer(avPosition_mediacodec, 2, GLES20.GL_FLOAT, false, 8, vertexBuffer);
+        GLES20.glVertexAttribPointer(avPosition_mediacodec, 2, GLES20.GL_FLOAT, false, 0, vertexBuffer);
 
         GLES20.glEnableVertexAttribArray(afPosition_mediacodec);
-        GLES20.glVertexAttribPointer(afPosition_mediacodec, 2, GLES20.GL_FLOAT, false, 8, textureBuffer);
+        GLES20.glVertexAttribPointer(afPosition_mediacodec, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
 
+        GLES20.glUniformMatrix4fv(mVertexMatrixHandler, 1, false, mMatrix, 0);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
         GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId_mediacodec);
         GLES20.glUniform1i(samplerOES_mediacodec, 0);
+        surfaceTexture.updateTexImage();
+
+    }
+
+    private void initDefMatrix() {
+        if (mMatrix != null) return;
+        if (mVideoWidth != -1 && mVideoHeight != -1 &&
+                mWorldWidth != -1 && mWorldHeight != -1) {
+            mMatrix = new float[16];
+            float originRatio = mVideoWidth / (float)mVideoHeight;
+            float worldRatio = mWorldWidth / (float)mWorldHeight;
+            if (mWorldWidth > mWorldHeight) {
+                if (originRatio > worldRatio) {
+                    float actualRatio = originRatio / worldRatio;
+                    Matrix.orthoM(
+                            mMatrix, 0,
+                            -1f, 1f,
+                            -actualRatio, actualRatio,
+                            -1f, 3f
+                    );
+                } else {// 原始比例小于窗口比例，缩放高度度会导致高度超出，因此，高度以窗口为准，缩放宽度
+                    float actualRatio = worldRatio / originRatio;
+                    Matrix.orthoM(
+                            mMatrix, 0,
+                            -actualRatio, actualRatio,
+                            -1f, 1f,
+                            -1f, 3f
+                    );
+                }
+            } else {
+                if (originRatio > worldRatio) {
+                    float actualRatio = originRatio / worldRatio;
+                    Matrix.orthoM(
+                            mMatrix, 0,
+                            -1f, 1f,
+                            -actualRatio, actualRatio,
+                            -1f, 3f
+                    );
+                } else {// 原始比例小于窗口比例，缩放高度会导致高度超出，因此，高度以窗口为准，缩放宽度
+                    float actualRatio = worldRatio / originRatio;
+                    Matrix.orthoM(
+                            mMatrix, 0,
+                            -actualRatio, actualRatio,
+                            -1f, 1f,
+                            -1f, 3f
+                    );
+                }
+            }
+        }
     }
 
     @Override

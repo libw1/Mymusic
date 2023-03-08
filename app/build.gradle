@@ -9,6 +9,10 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk{
+            // 打包生成的 APK 文件指挥包含 ARM 指令集的动态库
+            abiFilters "armeabi-v7a"
+        }
     }
     buildTypes {
         release {

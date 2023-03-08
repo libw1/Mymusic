@@ -58,6 +58,18 @@ android {
         }
     }
 
+    packagingOptions {
+        pickFirst 'jniLibs/armeabi-v7a/libswscale-4.so'
+        pickFirst 'jniLibs/armeabi-v7a/libavcodec-57.so'
+        pickFirst 'jniLibs/armeabi-v7a/libavutil-55.so'
+        pickFirst 'jniLibs/armeabi-v7a/libavformat-57.so'
+        pickFirst 'jniLibs/armeabi-v7a/libavfilter-6.so'
+        pickFirst 'jniLibs/armeabi-v7a/libswresample-2.so'
+        pickFirst 'jniLibs/armeabi-v7a/libavdevice-57.so'
+        pickFirst 'jniLibs/armeabi-v7a/libpostproc-54.so'
+    }
+//    ndkVersion '23.0.7599858'
+
 }
 
 dependencies {

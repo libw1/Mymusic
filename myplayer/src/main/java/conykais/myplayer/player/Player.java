@@ -525,6 +525,8 @@ public class Player {
         if(surface != null){
             try {
                 glSurfaceView.getRenderer().setRenderType(Renderer.RENDER_MEDIACODEC);
+                glSurfaceView.getRenderer().setVideoWidth(width);
+                glSurfaceView.getRenderer().setVideoHeight(height);
                 String mime = VideoSupportUitl.findVideoCodecName(codecName);
                 mediaFormat = MediaFormat.createVideoFormat(mime, width, height);
                 mediaFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, width * height);
