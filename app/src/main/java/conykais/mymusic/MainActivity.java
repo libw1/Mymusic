@@ -1,9 +1,14 @@
 package conykais.mymusic;
 
+import android.content.pm.ActivityInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -34,10 +39,21 @@ public class MainActivity extends AppCompatActivity {
     private boolean isSeekBar;
     private int position = 0;
     private GLSurfaceView glSurfaceView;
+    private boolean isFull = false;
+    private LinearLayout ll_othre;
+    private RelativeLayout rl_title;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StatusBar statusBar = new StatusBar(MainActivity.this);
+        //设置颜色为半透明
+//        statusBar.setColor(R.color.translucent);
+//        //设置颜色为透明
+        statusBar.setColor(R.color.transparent);
+//        //隐藏状态栏
+//        statusBar.hide();
+        statusBar.setTextColor(false);
         setContentView(R.layout.activity_main);
 
         timeInfoText = findViewById(R.id.time_info);
@@ -45,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         playSeekBar = findViewById(R.id.play_seek_bar);
         voiceSeekbar = findViewById(R.id.voice_seek_bar);
         glSurfaceView = findViewById(R.id.gl_surface_view);
+        ll_othre = findViewById(R.id.ll_other);
+        rl_title = findViewById(R.id.rl_title);
 
         player = new Player();
         player.setVolume(50);
@@ -184,7 +202,8 @@ public class MainActivity extends AppCompatActivity {
 //        player.setSource("/sdcard/DCIM/Camera/VID_20210929_165136_8K.mp4");
 //        player.setSource("/sdcard/DCIM/Camera/VID_20230308_175338.mp4");
 //        player.setSource("/sdcard/DCIM/Camera/VID_20210915_102200.mp4");
-        player.setSource("/sdcard/video.mp4");
+//        player.setSource("/sdcard/video.mp4");
+                player.setSource("/sdcard/Movies/英雄联盟手游精彩时刻/20220519010057_0.mp4");
 //        player.setSource("/sdcard/youtube-dl/waypoint.mp4");
 //        player.setSource("/sdcard/youtube-dl/1080sh.mp4");
 //        player.setSource("/sdcard/youtube-dl/测试.h265");
@@ -259,5 +278,36 @@ public class MainActivity extends AppCompatActivity {
 
     public void pauseRecord(View view) {
         player.pauseRecord();
+    }
+
+    public void full(View view) {
+        if (isFull) {
+            isFull = false;
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            ll_othre.setVisibility(View.VISIBLE);
+            rl_title.setVisibility(View.VISIBLE);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) glSurfaceView.getLayoutParams();
+            params.height = 555;
+            glSurfaceView.setLayoutParams(params);
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN); //显示状态栏
+        } else {
+            isFull = true;
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            ll_othre.setVisibility(View.GONE);
+            rl_title.setVisibility(View.GONE);
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) glSurfaceView.getLayoutParams();
+            params.height = LinearLayout.LayoutParams.MATCH_PARENT;
+            glSurfaceView.setLayoutParams(params);
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);//隐藏状态栏
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isFull) {
+            full(glSurfaceView);
+            return;
+        }
+        super.onBackPressed();
     }
 }

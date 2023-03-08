@@ -262,7 +262,6 @@ public class Renderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameA
     }
 
     private void initDefMatrix() {
-        if (mMatrix != null) return;
         if (mVideoWidth != -1 && mVideoHeight != -1 &&
                 mWorldWidth != -1 && mWorldHeight != -1) {
             mMatrix = new float[16];
